@@ -108,6 +108,15 @@
 			$_SESSION['username'] = $user->username;
 			$_SESSION['userlevel'] = $user->userlevel;
 			$_SESSION['userid'] = $user->id;
+			
+			//selezione primo account
+			$account = Account::first(
+				array(
+					'conditions' => array('user_id = ?', $user->id)
+				)
+			);
+			if ($account != null) $_SESSION['accountid'] = $account->id;
+			
 			?>
 			<script>
 				$(document).ready(function(){
@@ -132,8 +141,9 @@
 	// Funzione di logout
 	if (isset($_GET['logout'])){
 		unset($_SESSION['userid']);
-		unset($_SESSION['accountid']);
+		unset($_SESSION['userlevel']);
 		unset($_SESSION['username']);
+		unset($_SESSION['accountid']);
 		
 		?>
 		<script>
@@ -217,7 +227,7 @@
 		<?php
 			
 			if (isset($pagedata['pagetitle'])){
-				echo '<h2>'.$pagedata['pagetitle'].'</h2>';
+				echo '<h3>'.$pagedata['pagetitle'].'</h3>';
 			}
 			
 			if (isset($pagedata['onlyadmin'])){

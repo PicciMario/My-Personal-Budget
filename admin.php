@@ -38,7 +38,7 @@
 					<input type="text" name="pwd1"><br>
 					Ripeti password:<br>
 					<input type="text" name="pwd2"><br>				
-					Livello utente:
+					Livello utente:<br>
 					<select name="userlevel">
 						<option value="0" <?php if ($userlevel == 0) echo "selected" ?>>Utente normale</option>
 						<option value="1" <?php if ($userlevel == 1) echo "selected" ?>>Admin</option>
@@ -76,9 +76,9 @@
 				<form action="admin.php" method="post">
 				<fieldset>
 					<legend>Modifica utente</legend>
-					Nome utente: <br>
-					<h3><?php echo $user->username; ?></h3>	
-					Email:<br>
+					Nome utente:
+					<strong><?php echo $user->username; ?></strong>	<br>
+					Email:
 					<input type="text" size=40 name="email" value="<?php echo $user->email; ?>"><br>
 					Livello utente:
 					<select name="userlevel">
@@ -87,21 +87,35 @@
 					</select><br>
 					<input type=hidden name="action" value="edituser">
 					<input type=hidden name="id" value="<?php echo $id; ?>">
-					<input type=submit value="Salva"><br><br>
-					<hr>
-					Utente creato: <?php echo $user->created_at; ?><br>
-					Ultima modifica: <?php echo $user->updated_at; ?><br><br>
-					<hr>
-					Conti:<br>
-					<?php 
-					foreach ($user->accounts as $account){
-						echo $account->id.' - '.$account->description.'<br>';
-					} 
-					?>
-					
+					<input type=submit value="Salva">					
 				</fieldset>
 				</form>
-				<?php
+				
+				<form action="admin.php" method="post">
+				<fieldset>
+					<legend>Modifica password</legend>
+
+					Nuova password:
+					<input type="text" size=40 name="pwd1"><br>
+					Ripeti nuova password:
+					<input type="text" size=40 name="pwd2"><br>
+					
+					<input type=hidden name="action" value="edituserpwd">
+					<input type=hidden name="id" value="<?php echo $id; ?>">
+					<input type=submit value="Modifica">					
+				</fieldset>
+				</form>
+				
+				<fieldset><legend>Informazioni utente</legend>
+				Data creazione: <?php echo $user->created_at; ?><br>
+				Ultima modifica: <?php echo $user->updated_at; ?><br><br>
+				<hr>
+				Conti:<br>
+				<?php 
+				foreach ($user->accounts as $account){
+					echo $account->id.' - '.$account->description.'<br>';
+				} 
+				echo "</fieldset>";
 				
 				break;
 				
@@ -123,9 +137,8 @@
 				echo '</table></fieldset>';
 				
 				break;
-							
 				
-				
+			// DEFAULT
 			default:
 				err('Errore: passato GET->action = '.$action);
 				break;
@@ -241,6 +254,59 @@
 				
 				break;	
 			
+			// EDITUSERPWD - modifica password utente
+			case "edituserpwd":
+				if (!isset($_POST['id']) || 
+					!isset($_POST['pwd1']) ||
+					!isset($_POST['pwd2']) ){
+					
+					err('Errore: passato POST->action = edituserpwd senza parametri');
+					break;
+				}
+				
+				$userid = $_POST['id'];
+				$pwd1 = $_POST['pwd1'];
+				$pwd2 = $_POST['pwd2'];
+				
+				if (strcmp($pwd1, $pwd2) != 0){
+					err("Le due password inserite non coincidono.");
+					break;
+				}
+				
+				if (strcmp($pwd1, "") == 0){
+					err("La nuova password non può essere nulla.");
+					break;				
+				}
+			
+				$user = User::first(
+					array(
+						'conditions' => array(
+							'id = ?', $_POST['id']
+						)
+					)
+				);
+				
+				if ($user == null){
+					err('Utente con ID '.$_POST['id'].' non trovato');
+					break;
+				}
+					
+				$user->password = md5($pwd1);
+		
+				$result = $user->save();
+				
+				if ($result == false){
+					$errors = '<ul class="error" style="padding:10px 10px 10px 20px;">';
+					foreach ($user->errors as $msg)
+						$errors .= '<li>'.$msg;
+					$errors .= '</ul>';
+					echo $errors;
+				}
+				else conf('Utente '.$user->username.' aggiornato correttamente');
+				
+				break;	
+			
+			// DEFAULT
 			default:
 				err('Errore: passato POST->action = '.$action);
 				break;

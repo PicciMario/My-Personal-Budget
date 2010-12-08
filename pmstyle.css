@@ -60,17 +60,17 @@
 /* Lista transazioni ----------------------------------------------------------------------- */
 
 .positive{
-	background-color:#57E964;
+	background-color:#A9F5A9;
 }
 .positive:hover{
-	background-color:#6AFB92;
+	background-color:#81F781;
 }
 
 .negative{
-	background-color:#E55451;
+	background-color:#F5A9A9;
 }
 .negative:hover{
-	background-color:#F75D59;
+	background-color:#F78181;
 }
 
 .transaction{
@@ -126,4 +126,39 @@
 	height:20px;
 	overflow:hidden;
 	//border: 1px solid black;
+}
+
+/* Toolbar ----------------------------------------------------------------------- */
+
+.toolbar{
+	margin-bottom: 10px;
+	text-decoration:none;
+}
+.toolbarButton{
+	border: 1px solid #BDEDFF;
+	margin-right:3px;
+	width:70px;
+	padding:5px;
+	position:relative;
+	display:inline;
+	text-align:center;
+	background-color:#E0FFFF;
+	-moz-border-radius:10px;
+	border-radius:10px;
+	text-decoration:none;
+	color:blue;
+}
+.toolbarButton:hover{
+	background-color: #BDEDFF;
+	text-decoration:none;
+	color:blue;
+}
+.toolbarButton:visited{
+	text-decoration:none;
+}
+.toolbarButton:link{
+	text-decoration:none;
+}
+.toolbarButton:active{
+	text-decoration:none;
 }

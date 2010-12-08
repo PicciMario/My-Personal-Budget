@@ -244,7 +244,19 @@
 	//**** corpo della pagina ***************************************************************
 	
 	if ($showlist == 1){
-		echo '<p><a href="account.php?action=listaccount">Seleziona conto</a></p>';
+		?>
+		
+		<div class="toolbar">
+
+			<a href="account.php?action=listaccount" class="toolbarButton">Cambia conto</a>
+			
+			<div id="addTransaction" class="toolbarButton">
+			  	Nuova voce
+			</div>
+		
+		</div>
+		
+		<?php
 		
 		if (!isset($_SESSION['userid'])){
 			err("Utente non valido");
@@ -308,10 +320,6 @@
 				
 				?>
 				
-				<div id="addTransaction">
-				  	Aggiungi transazione
-				</div>
-				
 				<div id="addTransactionForm" style="display:none">
 					<form action="account.php" method="post">
 					<fieldset style="width:80%">
@@ -324,7 +332,7 @@
 						<select name="category">
 							<?php
 							foreach($categories as $category){
-								echo '<option value="'.$category->id.'">'.$category->description.'</option>';
+								echo '<option value="'.$category->id.'">'.$category->name.'</option>';
 								echo $category->name;
 							}
 							?>
@@ -352,7 +360,7 @@
 				});
 
 				$('#addTransaction').click(function() {
-				  $('#addTransactionForm').show('slow', function() {
+				  $('#addTransactionForm').toggle('slow', function() {
 				    // Animation complete.
 				  });
 				});
