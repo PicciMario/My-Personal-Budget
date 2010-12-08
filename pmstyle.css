@@ -78,7 +78,7 @@
 	display:block;
 	padding:0px;
 	margin:5px;
-	height:21px;
+	height:23px;
 	border:1px solid #BDEDFF;
 	-moz-border-radius: 10px;
 	border-radius: 10px;
@@ -91,17 +91,39 @@
 	left:10px;
 	width:30px;
 	text-align:center;
-	height:20px;
+	height:18px;
 	top:2px;
+	//border: 1px solid black;
+}
+.transactionDate{
+	position:absolute;
+	left:41px;
+	width:60px;
+	text-align:center;
+	height:20px;
+	overflow:hidden;
+	//border: 1px solid black;
 }
 .transactionDescr{
 	position:absolute;
-	left:50px;
-	width:300px;
+	left:105px;
+	width:280px;
 	height:20px;
+	overflow:hidden;
+	//border: 1px solid black;
+}
+.transactionCat{
+	position:absolute;
+	left:390px;
+	width:140px;
+	height:20px;
+	overflow:hidden;
+	//border: 1px solid blue;
 }
 .transactionValue{
 	float:right;
 	margin-right:20px;
 	height:20px;
+	overflow:hidden;
+	//border: 1px solid black;
 }

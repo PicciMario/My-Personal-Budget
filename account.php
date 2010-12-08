@@ -36,8 +36,14 @@
 			echo '<img src="images/select.jpg"/>';
 			echo '</a>';
 		echo '</div>';
+		echo '<div class="transactionDate">';
+			echo $transaction->date->format("d/m/y");
+		echo '</div>';
 		echo '<div class="transactionDescr">';
 			echo $transaction->description;
+		echo '</div>';
+		echo '<div class="transactionCat">';
+			echo $transaction->category->name;
 		echo '</div>';
 		echo '<div class="transactionValue">';
 			printf("%01.2f", $import);
@@ -173,11 +179,13 @@
 		
 		switch ($action){
 			
-			// LISTACCOUNT - mostra la lista dei conti per l'utente corrente
+			// NEWTRANSACTION - crea nuova transazione
 			case "newtransaction":
 			
 				if (!isset($_POST['description']) || 
-					!isset($_POST['import']) ){
+					!isset($_POST['import']) ||
+					!isset($_POST['category']) ||
+					!isset($_POST['date'])){
 					
 					err("Non sono stati passati tutti i parametri necessari.");
 					break;
@@ -185,11 +193,15 @@
 				
 				$newdescription = $_POST['description'];
 				$newimport = $_POST['import'];
+				$newcategory = $_POST['category'];
+				$newdate = $_POST['date'];
 				
 				//salvataggio temporaneo in caso di mancata validazione
 				$_SESSION['temp']['newtransaction'] = array(
 					'description' => $newdescription,
-					'import' => $newimport
+					'import' => $newimport,
+					'category' => $newcategory,
+					'date' => $newdate
 				);	
 				
 				if (!is_numeric($newimport)){
@@ -201,6 +213,8 @@
 				$transaction->description = $newdescription;
 				$transaction->import = $newimport;
 				$transaction->account_id = $_SESSION['accountid'];
+				$transaction->category_id = $newcategory;
+				$transaction->date = $newdate;
 		
 				$result = $transaction->save();
 				
@@ -212,7 +226,7 @@
 					echo $errors;
 				}
 				else {
-					conf('Nuova transazione '.$transaction->description.' creato correttamente');
+					conf('Nuova transazione "'.$transaction->description.'" creata correttamente');
 					unset($_SESSION['temp']['newtransaction']);
 				}
 				
@@ -271,12 +285,27 @@
 				//recupero cache da validazione
 				$description = "";
 				$import = 0;
+				$date = "";
+				$category = 0;
 				if (isset($_SESSION['temp']['newtransaction'])){
 					$description = $_SESSION['temp']['newtransaction']['description'];
 					$import = $_SESSION['temp']['newtransaction']['import'];
+					$category = $_SESSION['temp']['newtransaction']['category'];
+					//$date = $_SESSION['temp']['newtransaction']['date'];
 					unset($_SESSION['temp']['newuser']);
 					echo '<script>$(document).ready(function() {$(\'div#addTransactionForm\').show();})</script>';
 				}
+				
+				//recupero elenco categorie per l'utente				
+				$categories = Category::find(
+					'all',
+					array(
+						'conditions' => array(
+							'user_id = ?', $user->id
+						)
+					)				
+				);		
+				
 				?>
 				
 				<div id="addTransaction">
@@ -287,11 +316,28 @@
 					<form action="account.php" method="post">
 					<fieldset style="width:80%">
 						<legend>Aggiungi Transazione</legend>
+						
 						Descrizione:<br>
 						<input type="text" size=60 name="description" value="<?php echo $description; ?>"><br>
+						
+						Categoria:<br>
+						<select name="category">
+							<?php
+							foreach($categories as $category){
+								echo '<option value="'.$category->id.'">'.$category->description.'</option>';
+								echo $category->name;
+							}
+							?>
+						</select><br>
+						
 						Importo:<br>
 						<input type="text" name="import" value="<?php echo $import; ?>"><br>
+						
+						Data:<br>
+						<input type="text" id="datepicker" name="date" value="<?php echo $date; ?>"><br>
+						
 						<input type=hidden name="action" value="newtransaction">
+						
 						<input type=submit value="Salva">
 						<input type=button id="closeTransactionForm" value="Annulla">
 	
@@ -299,13 +345,18 @@
 					</form>
 				</div>
 				
-				
 				<script>
+				$(function() {
+					$( "#datepicker" ).datepicker();
+					$( "#datepicker" ).datepicker( "option", "dateFormat", "d-m-yy" );
+				});
+
 				$('#addTransaction').click(function() {
 				  $('#addTransactionForm').show('slow', function() {
 				    // Animation complete.
 				  });
 				});
+				
 				$('#closeTransactionForm').click(function() {
 				  $('#addTransactionForm').hide('slow', function() {
 				    // Animation complete.
@@ -317,16 +368,36 @@
 				<?php
 				
 				// Stampa transazioni conto attuale
+				$year = date('Y');
+				$month = date('m');
 				
-				echo '<fieldset style="width:80%"><legend>'.$conto->description.'</legend>';
+				if (isset($_GET['year']) && isset($_GET['month'])){
+					$year = $_GET['year'];
+					$month = $_GET['month'];
+				}
+				
+				$datemin = $year.'-'.$month.'-00';
+				$datemax = $year.'-'.$month.'-99';
+				
+				$transactions = Transaction::find(
+					'all',
+					array(
+						'conditions' => array('account_id = ? AND date >= ? and DATE <= ?', $conto->id, $datemin, $datemax),
+						'order' => 'date asc'
+					)
+				);
+				
+				echo '<fieldset style="width:80%"><legend>'.$conto->description.' - '.$month.'/'.$year.'</legend>';
+
 				$totale = 0;
-				foreach ($conto->transactions as $transaction){
+				foreach ($transactions as $transaction){
 					printTransaction($transaction);
 					$totale += $transaction->import;
 				}
 				
 				// Stampa totale conto attuale
 				printTotal($totale);
+				
 				echo '</fieldset>';
 				
 			}
