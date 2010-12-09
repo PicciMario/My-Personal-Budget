@@ -43,6 +43,7 @@ DROP TABLE transactions;
 CREATE TABLE transactions (
 	id integer primary key autoincrement,
 	description varchar(30),
+	note text,
 	account_id integer,
 	category_id integer,
 	date datetime,

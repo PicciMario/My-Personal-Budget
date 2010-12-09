@@ -5,6 +5,11 @@
 	include('header.inc.php');
 ?>
 
+<script>
+function mostraDiv(divname){
+	$("#"+divname).toggle();
+}
+</script>
 
 <?php
 	function printAccount($account){
@@ -32,9 +37,9 @@
 		if ($import < 0) echo 'negative';
 		echo '">';
 		echo '<div class="transactionId">';
-			echo '<a href="account.php?action=selectaccount&id='.$transaction->id.'">';
-			echo '<img src="images/select.jpg"/>';
-			echo '</a>';
+			if (strcmp($transaction->note, "") != 0){
+				echo '<img src="images/select.jpg" onclick="mostraDiv(\'transNote'.$transaction->id.'\')"/>';
+			}
 		echo '</div>';
 		echo '<div class="transactionDate">';
 			echo $transaction->date->format("d/m/y");
@@ -46,12 +51,16 @@
 			echo $transaction->category->name;
 		echo '</div>';
 		echo '<div class="transactionValue">';
-			printf("%01.2f", $import);
+			printf("%01.2f €", $import);
 		echo '</div>';
+		echo '</div>';
+		
+		echo '<div id="transNote'.$transaction->id.'" style="display:none;">';
+		echo $transaction->note;
 		echo '</div>';
 	}
 	
-	function printTotal($import){
+	function printTotal($text, $import){
 		echo '<div class="transaction transactionTotal ';
 		if ($import >= 0) echo 'positive';
 		if ($import < 0) echo 'negative';
@@ -59,10 +68,10 @@
 		echo '<div class="transactionId">';
 		echo '</div>';
 		echo '<div class="transactionDescr">';
-			echo 'Totale';
+			echo $text;
 		echo '</div>';
 		echo '<div class="transactionValue">';
-			printf("%01.2f", $import);
+			printf("%01.2f €", $import);
 		echo '</div>';
 		echo '</div>';
 	}
@@ -185,7 +194,8 @@
 				if (!isset($_POST['description']) || 
 					!isset($_POST['import']) ||
 					!isset($_POST['category']) ||
-					!isset($_POST['date'])){
+					!isset($_POST['date']) ||
+					!isset($_POST['note'])){
 					
 					err("Non sono stati passati tutti i parametri necessari.");
 					break;
@@ -195,14 +205,16 @@
 				$newimport = $_POST['import'];
 				$newcategory = $_POST['category'];
 				$newdate = $_POST['date'];
+				$newnote = $_POST['note'];
 				
 				//salvataggio temporaneo in caso di mancata validazione
 				$_SESSION['temp']['newtransaction'] = array(
 					'description' => $newdescription,
 					'import' => $newimport,
 					'category' => $newcategory,
-					'date' => $newdate
-				);	
+					'date' => $newdate,
+					'note' => $newnote
+				);
 				
 				if (!is_numeric($newimport)){
 					err("L'importo deve essere numerico!");
@@ -215,6 +227,7 @@
 				$transaction->account_id = $_SESSION['accountid'];
 				$transaction->category_id = $newcategory;
 				$transaction->date = $newdate;
+				$transaction->note = $newnote;
 		
 				$result = $transaction->save();
 				
@@ -299,12 +312,14 @@
 				$import = 0;
 				$date = "";
 				$category = 0;
+				$note = "";
 				if (isset($_SESSION['temp']['newtransaction'])){
 					$description = $_SESSION['temp']['newtransaction']['description'];
 					$import = $_SESSION['temp']['newtransaction']['import'];
 					$category = $_SESSION['temp']['newtransaction']['category'];
-					//$date = $_SESSION['temp']['newtransaction']['date'];
-					unset($_SESSION['temp']['newuser']);
+					$date = $_SESSION['temp']['newtransaction']['date'];
+					$note = $_SESSION['temp']['newtransaction']['note'];
+					unset($_SESSION['temp']['newtransaction']);
 					echo '<script>$(document).ready(function() {$(\'div#addTransactionForm\').show();})</script>';
 				}
 				
@@ -343,6 +358,9 @@
 						
 						Data:<br>
 						<input type="text" id="datepicker" name="date" value="<?php echo $date; ?>"><br>
+
+						Note:<br>
+						<textarea rows=4 cols=4 name="note"><?php echo $note; ?></textarea><br>
 						
 						<input type=hidden name="action" value="newtransaction">
 						
@@ -386,6 +404,19 @@
 				
 				$datemin = $year.'-'.$month.'-00';
 				$datemax = $year.'-'.$month.'-99';
+
+				$prevTransactions = Transaction::find(
+					'all',
+					array(
+						'conditions' => array('account_id = ? AND date < ?', $conto->id, $datemin),
+						'order' => 'date asc'
+					)
+				);
+				
+				$prevTotale = 0;
+				foreach ($prevTransactions as $prevTransaction){
+					$prevTotale += $prevTransaction->import;
+				}
 				
 				$transactions = Transaction::find(
 					'all',
@@ -397,14 +428,17 @@
 				
 				echo '<fieldset style="width:80%"><legend>'.$conto->description.' - '.$month.'/'.$year.'</legend>';
 
-				$totale = 0;
+				// Stampa storico
+				printTotal("Saldo a inizio mese", $prevTotale);
+
+				$totale = $prevTotale;
 				foreach ($transactions as $transaction){
 					printTransaction($transaction);
 					$totale += $transaction->import;
 				}
 				
 				// Stampa totale conto attuale
-				printTotal($totale);
+				printTotal("Saldo a fine mese", $totale);
 				
 				echo '</fieldset>';
 				
