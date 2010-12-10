@@ -201,7 +201,7 @@
 	<hr>
 	
 	<!-- Sidebar -->
-	<div class="span-4">
+	<div class="span-3">
 		<a href="index.php" class="sbarlink">Home</a>
 		
 		<?php
@@ -220,7 +220,7 @@
 	
 
 	<!-- Corpo della pagina -->
-	<div class="column span-20 last">
+	<div class="column span-18">
 		<div id="errormessage" class="error" style="display:none;"></div>
 		<div id="successmessage" class="success" style="display:none;"></div>
 		

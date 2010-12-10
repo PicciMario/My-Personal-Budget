@@ -1,6 +1,10 @@
 	<br>
 	</div>
 	
+	<div class="column span-3 last">
+	spazio in affitto :-)
+	</div>
+	
 	<hr>
 	
 	<!-- Footer -->

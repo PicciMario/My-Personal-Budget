@@ -55,8 +55,8 @@ function mostraDiv(divname){
 		echo '</div>';
 		echo '</div>';
 		
-		echo '<div id="transNote'.$transaction->id.'" style="display:none;">';
-		echo $transaction->note;
+		echo '<div id="transNote'.$transaction->id.'" style="display:none;" class="transactionNote note">';
+		echo nl2br(htmlspecialchars($transaction->note));
 		echo '</div>';
 	}
 	
@@ -261,7 +261,7 @@ function mostraDiv(divname){
 		
 		<div class="toolbar">
 
-			<a href="account.php?action=listaccount" class="toolbarButton">Cambia conto</a>
+			<a href="account.php?action=listaccount" class="toolbarButton">Lista conti</a>
 			
 			<div id="addTransaction" class="toolbarButton">
 			  	Nuova voce
@@ -337,7 +337,7 @@ function mostraDiv(divname){
 				
 				<div id="addTransactionForm" style="display:none">
 					<form action="account.php" method="post">
-					<fieldset style="width:80%">
+					<fieldset>
 						<legend>Aggiungi Transazione</legend>
 						
 						Descrizione:<br>
@@ -360,7 +360,7 @@ function mostraDiv(divname){
 						<input type="text" id="datepicker" name="date" value="<?php echo $date; ?>"><br>
 
 						Note:<br>
-						<textarea rows=4 cols=4 name="note"><?php echo $note; ?></textarea><br>
+						<textarea style="max-height:100px;" name="note"><?php echo $note; ?></textarea><br>
 						
 						<input type=hidden name="action" value="newtransaction">
 						
@@ -402,8 +402,8 @@ function mostraDiv(divname){
 					$month = $_GET['month'];
 				}
 				
-				$datemin = $year.'-'.$month.'-00';
-				$datemax = $year.'-'.$month.'-99';
+				$datemin = date("Y-m-d", mktime(0, 0, 0, $month, 1, $year));
+				$datemax = date("Y-m-d", mktime(0, 0, 0, $month+1, 0, $year));
 
 				$prevTransactions = Transaction::find(
 					'all',
@@ -426,8 +426,32 @@ function mostraDiv(divname){
 					)
 				);
 				
-				echo '<fieldset style="width:80%"><legend>'.$conto->description.' - '.$month.'/'.$year.'</legend>';
-
+				//calcola mese precedente
+				$prevyear = $year;
+				$prevmonth = $month - 1;
+				if ($prevmonth == 0){
+					$prevmonth = 12;
+					$prevyear = $prevyear - 1;
+				}
+				
+				//calcola mese successivo
+				$nextyear = $year;
+				$nextmonth = $month + 1;
+				if ($nextmonth > 12){
+					$nextmonth = 1;
+					$nextyear = $nextyear + 1;
+				}
+				
+				//barra di cambio mese
+				echo '<fieldset><legend>'.$conto->description.' - '.$month.'/'.$year.'</legend>';
+				echo '<div class="toolbar">';
+				echo '<div align=center>';
+				echo '<a href="account.php?year='.$prevyear.'&month='.$prevmonth.'" class="toolbarButton">&lt;&lt;&lt;</a>';
+				echo '<a href="account.php" class="toolbarButton">Oggi</a>';
+				echo '<a href="account.php?year='.$nextyear.'&month='.$nextmonth.'" class="toolbarButton">&gt;&gt;&gt;</a>';
+				echo '</div>';
+				echo '</div><hr>';
+			
 				// Stampa storico
 				printTotal("Saldo a inizio mese", $prevTotale);
 

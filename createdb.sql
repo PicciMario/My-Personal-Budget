@@ -1,3 +1,11 @@
+-- My Personal Budget
+-- mario.piccinelli@gmail.com
+
+-- Istruzioni per generare il database
+-- 1) sqlite3 my_database.db
+-- 2) .read createdb.sql
+-- 3) .exit
+
 DROP TABLE users;
 CREATE TABLE users (
 	id integer primary key autoincrement,
@@ -52,8 +60,8 @@ CREATE TABLE transactions (
 	updated_at varchar(30)
 );
 
-INSERT INTO transactions (description, account_id, date, import, category_id) VALUES ("Maglietta --------------------------------------------------------------------------------------------------------------------------------------------------------", 1, '2010-01-31', -30, 2);
-INSERT INTO transactions (description, account_id, date, import, category_id) VALUES ("Pizza a pranzo", 1, '2010-12-01', -5.50, 1);
+INSERT INTO transactions (description, account_id, date, import, category_id) VALUES ("Maglietta", 1, '2010-01-31', -30, 2);
+INSERT INTO transactions (description, account_id, date, import, category_id, note) VALUES ("Pizza a pranzo", 1, '2010-12-01', -5.50, 1, "mmm che buona :-)");
 INSERT INTO transactions (description, account_id, date, import, category_id) VALUES ("Stipendio", 1, '2010-12-31', 1100, 1);
 INSERT INTO transactions (description, account_id, date, import, category_id) VALUES ("transazione di prova sul conto 2", 2, '2010-12-01', -1.30, 3);
 

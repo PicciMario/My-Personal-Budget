@@ -73,15 +73,32 @@
 	background-color:#F78181;
 }
 
+.note{
+	background-color:yellow;
+}
+.note:hover{
+	background-color:orange;
+}
+
 .transaction{
 	position:relative;
 	display:block;
 	padding:0px;
-	margin:5px;
-	height:23px;
+	margin:3px 5px 3px 5px;
+	height:22px;
 	border:1px solid #BDEDFF;
 	-moz-border-radius: 10px;
 	border-radius: 10px;
+}
+.transactionNote{
+	position:relative;
+	display:block;
+	padding:5px;
+	margin:5px;
+	border:1px solid #BDEDFF;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	margin-left:80px;
 }
 .transactionTotal{
 	margin-left:100px;
@@ -138,13 +155,13 @@
 	border: 1px solid #BDEDFF;
 	margin-right:3px;
 	width:70px;
-	padding:5px;
+	padding:3px;
 	position:relative;
 	display:inline;
 	text-align:center;
 	background-color:#E0FFFF;
-	-moz-border-radius:10px;
-	border-radius:10px;
+	-moz-border-radius:5px;
+	border-radius:5px;
 	text-decoration:none;
 	color:blue;
 }

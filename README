@@ -1,13 +1,13 @@
 My Personal Budget
 Gestione Contabilità Personale
 
-Il database è SqLite3 ed è nel file my_database.db (che fantasia, eh?)
-
-E' stato previsto un file di comandi SQL "createdb.sql" per droppare tutte le tabelle e ricostruirle, e inserire dei dati di prova. Per ripulire il database è sufficiente da terminale spostarsi nella directory root del sito e:
+Il database è SqLite3 ed è nel file my_database.db (che fantasia, eh?). E' stato previsto un file di comandi SQL "createdb.sql" per costruire il database e inserire dei dati di prova. E' sufficiente da terminale spostarsi nella directory root del sito e:
 
 sqlite3 my_database.db
 .read createdb.sql
 .exit
+
+(se il database esiste già le tabelle vengono droppate e ricostruite).
 
 Tra i dati di prova vengono generati due utenti:
 
