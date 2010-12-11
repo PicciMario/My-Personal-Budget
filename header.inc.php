@@ -207,7 +207,8 @@
 		<?php
 			if (logged()){
 			?>
-				<a href="account.php" class="sbarlink">Conti</a>
+				<a href="account.php?action=listaccount" class="sbarlink">Conti</a>
+				<a href="account.php" class="sbarlink">Movimenti</a>
 			<?php
 			}
 			if (admin()){

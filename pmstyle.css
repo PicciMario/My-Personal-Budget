@@ -15,24 +15,34 @@
 .accountList:hover{
 	background-color: #BDEDFF;
 }
-.accountListId{
+.accountListIcon1{
 	position:absolute;
 	left:10px;
-	width:30px;
+	width:25px;
 	text-align:center;
 	height:20px;
-	top:2px;
+	//border:1px solid black;
+}
+.accountListIcon2{
+	position:absolute;
+	left:35px;
+	width:25px;
+	text-align:center;
+	height:20px;
+	//border:1px solid black;
 }
 .accountListDescr{
 	position:absolute;
-	left:50px;
-	width:200px;
+	left:65px;
+	width:300px;
 	height:20px;
+	//border:1px solid black;
 }
 .accountListDescr2{
 	position:absolute;
-	left:270px;
+	left:370px;
 	height:20px;
+	//border:1px solid black;
 }
 
 /* Sidebar ----------------------------------------------------------------------- */
