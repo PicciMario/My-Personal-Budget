@@ -125,6 +125,7 @@
 				echo '<fieldset><legend>Elenco utenti</legend>';
 				$users = User::all();
 				echo '<table>';
+				echo '<tr><th>ID</th><th>User Name</th><th>User Level</th><th>Email</th></tr>';
 				foreach($users as $user){
 					echo '<tr>';
 					echo '<td>'.$user->id.'</td>';

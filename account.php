@@ -111,9 +111,7 @@ function mostraDiv(divname){
 				
 				$user = User::first( 
 					array(
-						'conditions' => array(
-							'id = ?', $_SESSION['userid']
-						)
+						'conditions' => array('id = ?', $_SESSION['userid'])
 					)
 				);
 	
@@ -208,18 +206,15 @@ function mostraDiv(divname){
 					'note'
 				);
 				
-				//verifica presenza parametri
+				//verifica presenza e acquisizione parametri
+				$newValue = array();
 				foreach ($parametri as $parametro){
 					if (!isset($_POST[$parametro])){
 						err('Non sono stati passati tutti i parametri necessari (manca '.$parametro.').');
 						break;					
+					}else{
+						$newValue[$parametro] = $_POST[$parametro];
 					}
-				}
-				
-				//acquisizione nuovi parametri da POST
-				$newValue = array();
-				foreach ($parametri as $parametro){
-					$newValue[$parametro] = $_POST[$parametro];
 				}
 				
 				//salvataggio temporaneo in caso di mancata validazione
@@ -290,6 +285,12 @@ function mostraDiv(divname){
 		//se utente non valido interrompo
 		if ($user == null){
 			err('Errore: passato ID di utente inesistente.');
+			break;
+		}
+		
+		//se nessun conto selezionato
+		if (!isset($_SESSION['accountid'])){
+			err('Nessun conto selezionato');
 			break;
 		}
 		

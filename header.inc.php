@@ -2,6 +2,13 @@
 	session_start();
 	if (!isset($_SESSION['temp']))
 		$_SESSION['temp'] = array();
+		
+	//Inizializzazione PHP ActiveRecord	
+	require_once 'php-activerecord/ActiveRecord.php';
+	ActiveRecord\Config::initialize(function($cfg){
+		$cfg->set_model_directory('models');
+		$cfg->set_connections(array('development' => 'sqlite://my_database.db'));
+	});
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -16,8 +23,8 @@
         </title>
         
         <!-- BluePrint CSS Framework -->
-		<link rel="stylesheet" href="blueprint/screen.css" type="text/css" media="screen, projection">
-		<link rel="stylesheet" href="blueprint/print.css" type="text/css" media="print">	
+		<link rel="stylesheet" href="css/blueprint/screen.css" type="text/css" media="screen, projection">
+		<link rel="stylesheet" href="css/blueprint/print.css" type="text/css" media="print">	
 		<!--[if lt IE 8]>
 			<link rel="stylesheet" href="css/blueprint/ie.css" type="text/css" media="screen, projection">
 		<![endif]-->
@@ -27,17 +34,8 @@
 		<script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
 		<script type="text/javascript" src="js/jquery-ui-1.8.6.custom.min.js"></script>
 		
-		<link type="text/css" href="pmstyle.css" rel="stylesheet" />	
-		
-		<!-- PHP Active Record -->
-		<?php
-			require_once 'php-activerecord/ActiveRecord.php';
-			ActiveRecord\Config::initialize(function($cfg){
-				$cfg->set_model_directory('models');
-				$cfg->set_connections(array('development' => 'sqlite://my_database.db'));
-			});
-						
-		?>
+		<!-- CSS applicazione -->
+		<link type="text/css" href="css/pmstyle.css" rel="stylesheet" />	
    		
    		<script>
    		$(function(){
