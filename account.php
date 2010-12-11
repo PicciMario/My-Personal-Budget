@@ -120,7 +120,34 @@ function mostraDiv(divname){
 					break;
 				}	
 				
-				echo '<fieldset style="width:80%"><legend>Selezione conto</legend>';
+				?>
+				
+
+				<div class="toolbar">
+					<a href="#" class="toolbarButton" id="addTransaction" onclick="mostraDiv('addAccountForm')">Nuovo conto</a>
+				</div>	
+				
+				<div id="addAccountForm" style="display:none">
+					<form action="account.php" method="post">
+					<fieldset>
+						<legend>Aggiungi Conto</legend>
+						
+						Descrizione:<br>
+						<input type="text" size=60 name="description"><br>
+						
+						<input type=hidden name="action" value="newaccount">
+						
+						<input type=submit value="Salva">
+						<input type=button id="closeAccountForm" value="Annulla">
+		
+					</fieldset>
+					</form>
+				</div>
+				
+				<?php
+				
+				//stampa lista conti
+				echo '<fieldset><legend>Selezione conto</legend>';
 				foreach ($user->accounts as $account) {
 					echo printAccount($account);
 				}
@@ -244,6 +271,66 @@ function mostraDiv(divname){
 				else {
 					conf('Nuova transazione "'.$transaction->description.'" creata correttamente');
 					unset($_SESSION['temp']['newtransaction']);
+				}
+				
+				break;
+				
+			// NEWACCOUNT - crea nuovo conto
+			case "newaccount":
+			
+				//parametri passati da POST
+				//importante: i nomi devono essere uguali a quelli passati da
+				//form, i quali a loro volta devono essere uguali ai nomi dei
+				//record della tabella interessata!
+				$parametri = array(
+					'description'
+				);
+				
+				//verifica presenza e acquisizione parametri
+				$newValue = array();
+				foreach ($parametri as $parametro){
+					if (!isset($_POST[$parametro])){
+						err('Non sono stati passati tutti i parametri necessari (manca '.$parametro.').');
+						break;					
+					}else{
+						$newValue[$parametro] = $_POST[$parametro];
+					}
+				}
+				
+				//salvataggio temporaneo in caso di mancata validazione
+				$_SESSION['temp']['newaccount'] = $newValue;
+				
+				//impostazione parametri mancanti (non passati da POST)
+				if (!isset($_SESSION['userid'])){
+					error('Parametro user id non impostato');
+					break;
+				}
+				$newValue['user_id'] = $_SESSION['userid'];
+				
+				//creazione nuovo oggetto e salvataggio
+				$account = new Account($newValue);
+				$result = $account->save();
+				
+				//verifica salvataggio
+				if ($result == false){
+					$errors = '<ul class="error" style="padding:10px 10px 10px 20px;">';
+					foreach ($account->errors as $msg)
+						$errors .= '<li>'.$msg;
+					$errors .= '</ul>';
+					echo $errors;
+				}
+				else {
+					conf('Nuovo conto "'.$account->description.'" creata correttamente');
+
+					//individua l'ultimo conto creato e lo seleziona
+					$account = Account::last( 
+						array(
+							'conditions' => array(
+								'user_id = ?', $_SESSION['userid']
+							)
+						)
+					);
+					if ($account != null) $_SESSION['accountid'] = $account->id;
 				}
 				
 				break;

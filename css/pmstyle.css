@@ -36,12 +36,14 @@
 	left:65px;
 	width:300px;
 	height:20px;
+	overflow:hidden;
 	//border:1px solid black;
 }
 .accountListDescr2{
 	position:absolute;
 	left:370px;
 	height:20px;
+	overflow:hidden;
 	//border:1px solid black;
 }
 

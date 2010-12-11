@@ -5,6 +5,7 @@
 			array('description', 'message'=>'campo obbligatorio'),
 			array('import', 'message'=>'campo obbligatorio'),
 			array('category_id', 'message'=>'campo obbligatorio'),
+			array('account_id', 'message'=>'campo obbligatorio'),
 			array('date', 'message'=>'campo obbligatorio')
 		);
 		
