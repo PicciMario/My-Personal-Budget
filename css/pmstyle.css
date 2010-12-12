@@ -15,6 +15,22 @@
 .accountList:hover{
 	background-color: #BDEDFF;
 }
+.accountNote{
+	position:relative;
+	display:block;
+	padding:5px;
+	margin:5px;
+	border:1px solid #BDEDFF;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	margin-left:80px;
+}
+.aNote{
+	background-color:white;
+}
+.aNote:hover{
+	background-color:white;
+}
 .accountListIcon1{
 	position:absolute;
 	left:10px;
@@ -97,7 +113,7 @@
 	display:block;
 	padding:0px;
 	margin:3px 5px 3px 5px;
-	height:22px;
+	height:18px;
 	border:1px solid #BDEDFF;
 	-moz-border-radius: 10px;
 	border-radius: 10px;

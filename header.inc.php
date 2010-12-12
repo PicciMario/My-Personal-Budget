@@ -86,6 +86,11 @@
 		echo '<p class="success">'.$text.'</p>';
 	}
 	
+	//stampa notice
+	function notice($text){
+		echo '<p class="notice">'.$text.'</p>';
+	}
+	
 ?>
 
 

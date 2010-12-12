@@ -21,9 +21,7 @@ function mostraDiv(divname){
 			echo '</a>';
 		echo '</div>';
 		echo '<div class="accountListIcon2">';
-			echo '<a href="account.php?action=selectaccount&id='.$account->id.'">';
-			echo '<img src="images/select.jpg"/>';
-			echo '</a>';
+			echo '<img src="images/downTriangle.png" onclick="mostraDiv(\'accNote'.$account->id.'\')"/>';
 		echo '</div>';		
 		echo '<div class="accountListDescr">';
 			echo $account->description;
@@ -32,6 +30,13 @@ function mostraDiv(divname){
 			echo count($account->transactions)." voci.";
 		echo '</div>';
 		echo '</div>';
+		
+		echo '<div id="accNote'.$account->id.'" style="display:none;" class="accountNote aNote">';
+		echo '<div class="toolbar">';
+		echo '<a href="account.php?action=deleteaccount&accountid='.$account->id.'" class="toolbarButton">Elimina conto</a>';
+		echo '</div>';
+		echo '</div>';		
+		
 	}
 	
 	function printTransaction($transaction){
@@ -200,6 +205,68 @@ function mostraDiv(divname){
 				}
 				
 				break;
+				
+			// DELETEACCOUNT - elimina un conto
+			case "deleteaccount":
+				
+				//verifica che un utente sia loggato
+				if (!isset($_SESSION['userid'])) {
+					err('Errore: nessuna informazione di login.');
+					break;
+				}
+				
+				//verifica che sia stato passato il codice conto da eliminare
+				if (!isset($_GET['accountid'])){
+					err('Errore: nessun conto selezionato per la cancellazione.');
+					break;
+				}
+				$accountid = $_GET['accountid'];
+				
+				//individua l'utente loggato
+				$user = User::first( 
+					array(
+						'conditions' => array('id = ?', $_SESSION['userid'])
+					)
+				);
+				
+				//blocca se l'utente loggato non è valido
+				if ($user == null){
+					err('Errore: passato ID di utente inesistente.');
+					break;
+				}	
+				
+				//individua il conto richiesto
+				$account = Account::first( 
+					array(
+						'conditions' => array('id = ? AND user_id = ?', $accountid, $user->id)
+					)
+				);
+				
+				//blocca se il conto non è stato individuato per l'utente
+				if ($account == null){
+					err('Impossibile selezionare il conto indicato');
+					break;
+				}
+
+				if (isset($_GET['confirm'])){
+					foreach($account->transactions as $transaction)
+						$transaction->delete();
+					$account->delete();
+					conf('confermata cancellazione del conto');
+					break;
+				}
+				else{
+					$mess = 'Procedo a eliminare il conto "'.$account->description;
+					$mess .= '" e le sue '.count($account->transactions).' voci.<br>';
+					$mess .= '<a href="account.php?action=deleteaccount&accountid='.$account->id.'&confirm">';
+					$mess .= 'clicca per confermare';
+					$mess .= '</a>';
+					notice($mess);	
+					break;
+				}
+	
+				break;
+
 			
 			default:
 				err("Passato parametro action sconosciuto: ".$_GET['action']);
