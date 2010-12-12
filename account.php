@@ -9,6 +9,9 @@
 function mostraDiv(divname){
 	$("#"+divname).toggle();
 }
+function mostraDivSlow(divname){
+	$("#"+divname).toggle('slow');
+}
 </script>
 
 <?php
@@ -32,7 +35,7 @@ function mostraDiv(divname){
 		echo '</div>';
 		
 		echo '<div id="accNote'.$account->id.'" style="display:none;" class="accountNote aNote">';
-		echo '<div class="toolbar">';
+		echo '<div>';
 		echo '<a href="account.php?action=deleteaccount&accountid='.$account->id.'" class="toolbarButton">Elimina conto</a>';
 		echo '</div>';
 		echo '</div>';		
@@ -129,7 +132,7 @@ function mostraDiv(divname){
 				
 
 				<div class="toolbar">
-					<a href="#" class="toolbarButton" id="addTransaction" onclick="mostraDiv('addAccountForm')">Nuovo conto</a>
+					<a href="#" class="toolbarButton" id="addTransaction" onclick="mostraDivSlow('addAccountForm')">Nuovo conto</a>
 				</div>	
 				
 				<div id="addAccountForm" style="display:none">
@@ -143,7 +146,7 @@ function mostraDiv(divname){
 						<input type=hidden name="action" value="newaccount">
 						
 						<input type=submit value="Salva">
-						<input type=button id="closeAccountForm" value="Annulla">
+						<input type=button id="closeAccountForm" onclick="mostraDivSlow('addAccountForm')" value="Annulla">
 		
 					</fieldset>
 					</form>
@@ -420,7 +423,7 @@ function mostraDiv(divname){
 		?>
 		<div class="toolbar">
 			<a href="account.php?action=listaccount" class="toolbarButton">Lista conti</a>
-			<a href="#" class="toolbarButton" id="addTransaction">Nuova voce</a>
+			<a href="#" onclick="mostraDivSlow('addTransactionForm')" class="toolbarButton" id="addTransaction">Nuova voce</a>
 		</div>	
 		<?php
 		
@@ -518,7 +521,7 @@ function mostraDiv(divname){
 				<input type=hidden name="action" value="newtransaction">
 				
 				<input type=submit value="Salva">
-				<input type=button id="closeTransactionForm" value="Annulla">
+				<input type=button id="closeTransactionForm" onclick="mostraDivSlow('addTransactionForm')" value="Annulla">
 
 			</fieldset>
 			</form>
@@ -528,20 +531,7 @@ function mostraDiv(divname){
 		$(function() {
 			$( "#datepicker" ).datepicker();
 			$( "#datepicker" ).datepicker( "option", "dateFormat", "d-m-yy" );
-		});
-
-		$('#addTransaction').click(function() {
-		  $('#addTransactionForm').toggle('slow', function() {
-		    // Animation complete.
-		  });
-		});
-		
-		$('#closeTransactionForm').click(function() {
-		  $('#addTransactionForm').hide('slow', function() {
-		    // Animation complete.
-		  });
-		});				
-		
+		});			
 		</script>
 
 		<?php
