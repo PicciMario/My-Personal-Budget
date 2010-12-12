@@ -256,6 +256,8 @@ function mostraDivSlow(divname){
 						$transaction->delete();
 					$account->delete();
 					conf('confermata cancellazione del conto');
+					if ($_SESSION['accountid'] == $account->id)
+						unset($_SESSION['accountid']);
 					break;
 				}
 				else{
@@ -324,6 +326,10 @@ function mostraDivSlow(divname){
 				}
 				
 				//impostazione parametri mancanti (non passati da POST)
+				if (!isset($_SESSION['accountid'])){
+					err('Nessun conto selezionato');
+					break;
+				}
 				$newValue['account_id'] = $_SESSION['accountid'];
 				
 				//creazione nuovo oggetto e salvataggio
@@ -445,21 +451,27 @@ function mostraDivSlow(divname){
 			break;
 		}
 		
-		//se nessun conto selezionato
-		if (!isset($_SESSION['accountid'])){
-			err('Nessun conto selezionato');
-			break;
-		}
-		
 		//individuo conto
 		//per sicurezza verifico che sia collegato all'utente
-		$conto = Account::first(
-			array(
-				'conditions' => array(
-					'user_id = ? AND id = ?', $_SESSION['userid'], $_SESSION['accountid']
-				)
-			)				
-		);
+		//se nessun conto selezionato attivo il primo disponibile per l'utente
+		if (!isset($_SESSION['accountid'])){
+			$conto = Account::first(
+				array(
+					'conditions' => array(
+						'user_id = ?', $_SESSION['userid']
+					)
+				)				
+			);
+		}
+		else{
+			$conto = Account::first(
+				array(
+					'conditions' => array(
+						'user_id = ? AND id = ?', $_SESSION['userid'], $_SESSION['accountid']
+					)
+				)				
+			);
+		}
 		
 		//se trovo il conto mostro l'elenco
 		if ($conto == null) {
