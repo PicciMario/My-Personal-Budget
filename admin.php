@@ -4,6 +4,11 @@
 	include('header.inc.php');
 ?>
 
+<div class="toolbar">
+	<a href="admin.php?action=newuser" class="toolbarButton">Nuovo utente</a>
+	<a href="admin.php?action=listusers" class="toolbarButton">Elenco utenti</a>
+</div>	
+
 <?php
 	
 	//**** parametri GET ******************************************************************
@@ -320,12 +325,8 @@
 	else {
 		?>
 		L'amministratore è l'unico che capisca qualcosa di questo casino!
-		<br><br>
-		Funzioni di amministrazione:<br>
-		<ul>
-		<li><a href="admin.php?action=newuser">Nuovo utente</a>
-		<li><a href="admin.php?action=listusers">Elenco utenti</a>
-		</ul>		
+		<br>
+				
 		<?php
 	}
 

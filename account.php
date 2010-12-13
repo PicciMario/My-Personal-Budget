@@ -1,5 +1,5 @@
 <?php
-	$pagedata['pagetitle'] = "Conto";
+	$pagedata['pagetitle'] = "Gestione conti";
 	$pagedata['onlyadmin'] = 0;
 	$pagedata['onlylogged'] = 1;
 	include('header.inc.php');
@@ -597,15 +597,49 @@ function mostraDivSlow(divname){
 			$nextyear = $nextyear + 1;
 		}
 		
-		//barra di cambio mese
+		
 		echo '<fieldset><legend>'.$conto->description.' - '.$month.'/'.$year.'</legend>';
+		
+		//barra di cambio mese
 		echo '<div class="toolbar">';
 		echo '<div align=center>';
 		echo '<a href="account.php?year='.$prevyear.'&month='.$prevmonth.'" class="toolbarButton">&lt;&lt;&lt;</a>';
 		echo '<a href="account.php" class="toolbarButton">Oggi</a>';
+		echo '<a href="#" class="toolbarButton" onclick="mostraDiv(\'selectPeriod\')">Scegli...</a>';
 		echo '<a href="account.php?year='.$nextyear.'&month='.$nextmonth.'" class="toolbarButton">&gt;&gt;&gt;</a>';
 		echo '</div>';
-		echo '</div><hr>';
+		echo '</div>';
+		?>
+		<div align="center" id="selectPeriod" style="display:none;">
+		<form action="account.php" method="GET" class="inline">
+		Anno: 
+		<select name="year">
+			<?php
+			for ($i = 2000; $i < 2020; $i++)
+				echo '<option value="'.$i.'">'.$i.'</option>';
+			?>
+		</select>
+		Mese: 
+		<select name="month">
+			<option value="01">Gennaio</option>
+			<option value="02">Febbraio</option>
+			<option value="03">Marzo</option>
+			<option value="04">Aprile</option>
+			<option value="05">Maggio</option>
+			<option value="06">Giugno</option>
+			<option value="07">Luglio</option>
+			<option value="08">Agosto</option>
+			<option value="09">Settembre</option>
+			<option value="10">Ottobre</option>
+			<option value="11">Novembre</option>
+			<option value="12">Dicembre</option>
+		</select>
+		<input type=submit value="Vai">
+		</form>	
+		</div>
+		<?php
+		
+		echo '<hr>';
 	
 		// Stampa storico
 		printTotal("Saldo a inizio mese", $prevTotale);
