@@ -553,10 +553,12 @@ function mostraDivSlow(divname){
 		$month = date('m');
 		
 		if (isset($_GET['year']) && isset($_GET['month'])){
-			$year = $_GET['year'];
-			$month = $_GET['month'];
+			if (is_numeric($_GET['year']) && is_numeric($_GET['month'])){
+				$year = $_GET['year'];
+				$month = $_GET['month'];
+			}
 		}
-		
+
 		$datemin = date("Y-m-d", mktime(0, 0, 0, $month, 1, $year));
 		$datemax = date("Y-m-d", mktime(0, 0, 0, $month+1, 0, $year));
 
@@ -615,24 +617,27 @@ function mostraDivSlow(divname){
 		Anno: 
 		<select name="year">
 			<?php
-			for ($i = 2000; $i < 2020; $i++)
-				echo '<option value="'.$i.'">'.$i.'</option>';
+			for ($i = 2000; $i < 2020; $i++){
+				echo '<option value="'.$i.'"';
+				if (date('Y') == $i) echo ' selected';
+				echo '>'.$i.'</option>';
+			}
 			?>
 		</select>
 		Mese: 
 		<select name="month">
-			<option value="01">Gennaio</option>
-			<option value="02">Febbraio</option>
-			<option value="03">Marzo</option>
-			<option value="04">Aprile</option>
-			<option value="05">Maggio</option>
-			<option value="06">Giugno</option>
-			<option value="07">Luglio</option>
-			<option value="08">Agosto</option>
-			<option value="09">Settembre</option>
-			<option value="10">Ottobre</option>
-			<option value="11">Novembre</option>
-			<option value="12">Dicembre</option>
+			<option value="01" <?php if (date('m') == 1) echo ' selected ' ?> >Gennaio</option>
+			<option value="02" <?php if (date('m') == 2) echo ' selected ' ?> >Febbraio</option>
+			<option value="03" <?php if (date('m') == 3) echo ' selected ' ?> >Marzo</option>
+			<option value="04" <?php if (date('m') == 4) echo ' selected ' ?> >Aprile</option>
+			<option value="05" <?php if (date('m') == 5) echo ' selected ' ?> >Maggio</option>
+			<option value="06" <?php if (date('m') == 6) echo ' selected ' ?> >Giugno</option>
+			<option value="07" <?php if (date('m') == 7) echo ' selected ' ?> >Luglio</option>
+			<option value="08" <?php if (date('m') == 8) echo ' selected ' ?> >Agosto</option>
+			<option value="09" <?php if (date('m') == 9) echo ' selected ' ?> >Settembre</option>
+			<option value="10" <?php if (date('m') == 10) echo ' selected ' ?> >Ottobre</option>
+			<option value="11" <?php if (date('m') == 11) echo ' selected ' ?> >Novembre</option>
+			<option value="12" <?php if (date('m') == 12) echo ' selected ' ?> >Dicembre</option>
 		</select>
 		<input type=submit value="Vai">
 		</form>	
