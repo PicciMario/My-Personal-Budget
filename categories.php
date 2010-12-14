@@ -69,7 +69,7 @@
 				
 				echo '<fieldset><legend>Elenco categoria: '.$category->name.'</legend>';
 				foreach ($transactions as $transaction){
-					printTransaction($transaction);
+					printTransaction($transaction, 1);
 				}
 				echo '</fieldset>';
 				

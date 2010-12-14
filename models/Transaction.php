@@ -14,7 +14,8 @@
 		);
 		
 		static $belongs_to = array(
-			array('category')
+			array('category'),
+			array('account')
 		);
 		
 	}

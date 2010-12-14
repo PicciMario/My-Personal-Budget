@@ -29,7 +29,12 @@
 
 	//************************************************************************************************
 
-	function printTransaction($transaction){
+	function printTransaction($transaction, $descr = 0){
+		
+		//$descr indica cosa stampare nel secondo campo descrizione
+		//0 = nome categoria di appartenenza
+		//1 = nome conto di appartenenza
+		
 		if ($transaction == null) return;
 		$import = $transaction->import;
 		echo '<div class="transaction ';
@@ -48,7 +53,10 @@
 			echo $transaction->description;
 		echo '</div>';
 		echo '<div class="transactionCat">';
-			echo $transaction->category->name;
+			if ($descr == 0)
+				echo $transaction->category->name;
+			elseif ($descr == 1)
+				echo $transaction->account->description;
 		echo '</div>';
 		echo '<div class="transactionValue">';
 			printf("%01.2f €", $import);

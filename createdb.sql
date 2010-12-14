@@ -17,8 +17,8 @@ CREATE TABLE users (
 	updated_at varchar(30)
 );
 
-INSERT INTO users VALUES (1, "mario", "cd827c33216d4e6e46bc60699f3e18a1", 0, "mario.piccinelli@gmail.com", null, null);
-INSERT INTO users VALUES (2, "admin", "cd827c33216d4e6e46bc60699f3e18a1", 1, "mario.piccinelli@gmail.com", null, null);
+INSERT INTO users VALUES (1, "mario", "cd827c33216d4e6e46bc60699f3e18a1", 0, "io@me.it", null, null);
+INSERT INTO users VALUES (2, "admin", "cd827c33216d4e6e46bc60699f3e18a1", 1, "io@me.it", null, null);
 
 DROP TABLE accounts;
 CREATE TABLE accounts (
@@ -45,7 +45,9 @@ CREATE TABLE categories (
 
 INSERT INTO categories (id, name, description, user_id) VALUES (1, "alimentari", "roba da mangiare", 1);
 INSERT INTO categories (id, name, description, user_id) VALUES (2, "scuola", "roba di scuola", 1);
-INSERT INTO categories (id, name, description, user_id) VALUES (3, "admin", "descrizione di prova", 2);
+INSERT INTO categories (id, name, description, user_id) VALUES (3, "lavoro", "stipendio, e cose del genere", 1);
+INSERT INTO categories (id, name, description, user_id) VALUES (4, "frivolezze", "spese varie personali", 1);
+INSERT INTO categories (id, name, description, user_id) VALUES (5, "admin", "descrizione di prova", 2);
 
 DROP TABLE transactions;
 CREATE TABLE transactions (
@@ -60,9 +62,21 @@ CREATE TABLE transactions (
 	updated_at varchar(30)
 );
 
-INSERT INTO transactions (description, account_id, date, import, category_id) VALUES ("Maglietta", 1, '2010-01-31', -30, 2);
-INSERT INTO transactions (description, account_id, date, import, category_id, note) VALUES ("Pizza a pranzo", 1, '2010-12-01', -5.50, 1, "mmm che buona :-)");
-INSERT INTO transactions (description, account_id, date, import, category_id) VALUES ("Stipendio", 1, '2010-12-31', 1100, 1);
-INSERT INTO transactions (description, account_id, date, import, category_id) VALUES ("transazione di prova sul conto 2", 2, '2010-12-01', -1.30, 3);
+INSERT INTO transactions (description, account_id, date, import, category_id) 
+	VALUES ("Maglietta", 1, '2010-01-31', -30, 2);
+INSERT INTO transactions (description, account_id, date, import, category_id, note) 
+	VALUES ("Pizza a pranzo", 1, '2010-12-01', -5.50, 1, "mmm che buona :-)");
+INSERT INTO transactions (description, account_id, date, import, category_id) 
+	VALUES ("Pranzo con amici", 1, '2010-12-08', -25, 1);
+INSERT INTO transactions (description, account_id, date, import, category_id) 
+	VALUES ("Stipendio", 1, '2010-12-31', 1000, 3);
+INSERT INTO transactions (description, account_id, date, import, category_id) 
+	VALUES ("Stipendio", 1, '2010-11-30', 1000, 3);
+INSERT INTO transactions (description, account_id, date, import, category_id) 
+	VALUES ("Stipendio", 1, '2010-10-31', 1000, 3);
+INSERT INTO transactions (description, account_id, date, import, category_id) 
+	VALUES ("Stipendio", 1, '2010-09-30', 1000, 3);
+INSERT INTO transactions (description, account_id, date, import, category_id) 
+	VALUES ("Affitto appartamento", 2, '2010-12-01', -150, 2);
 
 	
