@@ -1,4 +1,3 @@
-
 /* Lista conti ----------------------------------------------------------------------- */
 
 .accountList{
@@ -62,6 +61,65 @@
 	overflow:hidden;
 	//border:1px solid black;
 }
+
+/* Lista categorie ----------------------------------------------------------------------- */
+
+.categoryList{
+	background-color:#E0FFFF;	
+	position:relative;
+	display:block;
+	padding:0px;
+	margin:5px;
+	height:21px;
+	border:1px solid #BDEDFF;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+}
+.categoryList:hover{
+	background-color: #BDEDFF;
+}
+.categoryNote{
+	position:relative;
+	display:block;
+	padding:5px;
+	margin:5px;
+	border:1px solid #BDEDFF;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	margin-left:80px;
+}
+.categoryListIcon1{
+	position:absolute;
+	left:10px;
+	width:25px;
+	text-align:center;
+	height:20px;
+	//border:1px solid black;
+}
+.categoryListIcon2{
+	position:absolute;
+	left:35px;
+	width:25px;
+	text-align:center;
+	height:20px;
+	//border:1px solid black;
+}
+.categoryListDescr{
+	position:absolute;
+	left:65px;
+	width:200px;
+	height:20px;
+	overflow:hidden;
+	//border:1px solid black;
+}
+.categoryListDescr2{
+	position:absolute;
+	left:270px;
+	height:20px;
+	overflow:hidden;
+	//border:1px solid black;
+}
+
 
 /* Sidebar ----------------------------------------------------------------------- */
 

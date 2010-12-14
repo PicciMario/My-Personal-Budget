@@ -9,6 +9,8 @@
 		$cfg->set_model_directory('models');
 		$cfg->set_connections(array('development' => 'sqlite://my_database.db'));
 	});
+	
+	include_once('printfunctions.inc.php');
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -43,6 +45,15 @@
    		}
    		)
    		</script>
+   
+		<script>
+			function mostraDiv(divname){
+				$("#"+divname).toggle();
+			}
+			function mostraDivSlow(divname){
+				$("#"+divname).toggle('slow');
+			}
+		</script>
    		
     </head>
     
@@ -212,6 +223,7 @@
 			?>
 				<a href="account.php?action=listaccount" class="sbarlink">Conti</a>
 				<a href="account.php" class="sbarlink">Movimenti</a>
+				<a href="categories.php" class="sbarlink">Categorie</a>
 			<?php
 			}
 			if (admin()){
