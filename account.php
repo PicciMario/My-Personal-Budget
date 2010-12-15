@@ -246,8 +246,6 @@
 	
 				break;
 				
-				
-		
 			default:
 				err("Passato parametro action sconosciuto: ".$_GET['action']);
 				break;
@@ -541,19 +539,17 @@
 		$datemin = date("Y-m-d", mktime(0, 0, 0, $month, 1, $year));
 		$datemax = date("Y-m-d", mktime(0, 0, 0, $month+1, 0, $year));
 
-		// ricerca transazioni precedenti al mese selezionato
+		// ricerca importo precedenti al mese selezionato
 		$prevTransactions = Transaction::find(
 			'all',
 			array(
+				'select' => 'sum(import) as sum_imports',
 				'conditions' => array('account_id = ? AND date < ?', $conto->id, $datemin),
-				'order' => 'date asc'
 			)
 		);
-		
-		// calcolo saldo a fine mese precedente
 		$prevTotale = 0;
-		foreach ($prevTransactions as $prevTransaction){
-			$prevTotale += $prevTransaction->import;
+		if ($prevTransactions != null){
+			$prevTotale = $prevTransactions[0]->sum_imports;
 		}
 		
 		// ricerca transazioni mese corrente
@@ -640,6 +636,18 @@
 		printTotal("Saldo a fine mese", $totale);
 		
 		echo '</fieldset>';
+		
+		$transactions = Transaction::find(
+			'all',
+			array(
+				'select' => 'sum(import) as sum_imports',
+				'conditions' => array('account_id = ? AND date >= ? and DATE <= ?', $conto->id, $datemin, $datemax),
+				'order' => 'date asc'
+			)
+		);
+		
+		$transaction = $transactions[0];
+		echo $transaction->sum_imports.' - ';
 			
 
 	}
