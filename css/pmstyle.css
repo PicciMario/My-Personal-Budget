@@ -160,10 +160,10 @@
 }
 
 .note{
-	background-color:yellow;
+	//background-color:yellow;
 }
 .note:hover{
-	background-color:orange;
+	//background-color:orange;
 }
 
 .transaction{

@@ -185,6 +185,68 @@
 				}
 	
 				break;
+						
+			// DELETETRANSACTION - elimina una transazione
+			case "deletetransaction":
+				
+				//verifica che un utente sia loggato
+				if (!isset($_SESSION['userid'])) {
+					err('Errore: nessuna informazione di login.');
+					break;
+				}
+				
+				//verifica che sia stato passato il codice transazione da eliminare
+				if (!isset($_GET['transactionid'])){
+					err('Errore: nessuna voce selezionata per la cancellazione.');
+					break;
+				}
+				$transactionid = $_GET['transactionid'];
+				
+				//individua l'utente loggato
+				$user = User::first( 
+					array(
+						'conditions' => array('id = ?', $_SESSION['userid'])
+					)
+				);
+				
+				//blocca se l'utente loggato non è valido
+				if ($user == null){
+					err('Errore: passato ID di utente inesistente.');
+					break;
+				}	
+				
+				//individua la voce richiesta
+				$transaction = Transaction::first( 
+					array(
+						'conditions' => array('id = ?', $transactionid)
+					)
+				);
+				
+				//conto cui appartiene la voce
+				$account = $transaction->account;
+				
+				//verifico che la voce appartenga a un conto dell'utente loggato
+				if ($account->user_id != $user->id){
+					err("la voce non appartiene all'utente loggato.");
+					break;
+				}
+
+				if (isset($_GET['confirm'])){
+					$transaction->delete();
+					conf('confermata cancellazione voce');
+				}
+				else{
+					$mess = 'Procedo a eliminare la voce "'.$transaction->description.'"<br>';
+					$mess .= '<a href="account.php?action=deletetransaction&transactionid='.$transaction->id.'&confirm">';
+					$mess .= 'clicca per confermare';
+					$mess .= '</a>';
+					notice($mess);	
+					break;
+				}
+	
+				break;
+				
+				
 		
 			default:
 				err("Passato parametro action sconosciuto: ".$_GET['action']);

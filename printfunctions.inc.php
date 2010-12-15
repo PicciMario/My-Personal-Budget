@@ -42,9 +42,7 @@
 		if ($import < 0) echo 'negative';
 		echo '">';
 		echo '<div class="transactionId">';
-			if (strcmp($transaction->note, "") != 0){
-				echo '<img src="images/downTriangle.png" onclick="mostraDiv(\'transNote'.$transaction->id.'\')"/>';
-			}
+			echo '<img src="images/downTriangle.png" onclick="mostraDiv(\'transNote'.$transaction->id.'\')"/>';
 		echo '</div>';
 		echo '<div class="transactionDate">';
 			echo $transaction->date->format("d/m/y");
@@ -64,8 +62,13 @@
 		echo '</div>';
 		
 		echo '<div id="transNote'.$transaction->id.'" style="display:none;" class="transactionNote note">';
+		echo '<div class="toolbar">';
+		echo '<a href="account.php?action=deletetransaction&transactionid='.$transaction->id.'" class=toolbarButton>';
+		echo 'Elimina voce</a>';
+		echo '</div>';
 		echo nl2br(htmlspecialchars($transaction->note));
 		echo '</div>';
+		
 	}
 
 	//************************************************************************************************
