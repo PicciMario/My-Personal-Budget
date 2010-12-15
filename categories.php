@@ -63,18 +63,92 @@
 					'all',
 					array(
 						'conditions' => array('category_id = ?', $category->id),
-						'order' => 'date asc'
+						'order' => 'date desc'
 					)
 				);
 				
-				echo '<fieldset><legend>Elenco categoria: '.$category->name.'</legend>';
+				//calcola totale
+				$totale = 0;
+				foreach ($transactions as $transaction){
+					$totale += $transaction->import;
+				}
+				
+				//stampa elementi
+				echo '<fieldset><legend>Elenco voci categoria: '.$category->name.'</legend>';
+				printTotal("Totale categoria", $totale);
 				foreach ($transactions as $transaction){
 					printTransaction($transaction, 1);
 				}
 				echo '</fieldset>';
 				
 				break;
+
+			// DELETECATEGORY - elimina categoria
+			case "deletecategory":
 			
+				if (!isset($_SESSION['userid'])){
+					err("Utente non valido");
+					break;
+				}
+				
+				if (!isset($_GET['categoryid'])){
+					err("Categoria non impostata");
+					break;
+				}
+					
+				//individuo utente
+				$user = User::first( 
+					array(
+						'conditions' => array('id = ?', $_SESSION['userid'])
+					)
+				);
+				
+				//se utente non valido interrompo
+				if ($user == null){
+					err('Errore: passato ID di utente inesistente.');
+					break;
+				}
+				
+				//individuo categoria
+				$category = Category::first( 
+					array(
+						'conditions' => array('id = ? AND user_id = ?', $_GET['categoryid'], $user->id)
+					)
+				);
+				
+				//se categoria non valida interrompo
+				if ($category == null){
+					err('Errore: passato ID di categoria inesistente.');
+					break;
+				}
+				
+				//voci nella categoria
+				$transactions = Transaction::find( 
+					'all',
+					array(
+						'conditions' => array('category_id = ?', $category->id)
+					)
+				);
+				
+				if (isset($_GET['confirm'])){
+					$category->delete();
+					foreach ($transactions as $transaction){
+						$transaction->delete();
+					}
+					conf('Confermata cancellazione categoria');
+				}
+				else{
+					$mess = 'Procedo a eliminare la categoria "'.$category->name;
+					$mess .= '" e le sue '.count($transactions).' voci.<br>';
+					$mess .= '<a href="categories.php?action=deletecategory&categoryid='.$category->id.'&confirm">';
+					$mess .= 'clicca per confermare';
+					$mess .= '</a>';
+					notice($mess);	
+					break;
+				}				
+				
+				break;
+
 			
 			default:
 				err("Passato parametro action sconosciuto: ".$_GET['action']);
