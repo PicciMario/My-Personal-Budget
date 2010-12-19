@@ -232,6 +232,17 @@
 				}
 
 				if (isset($_GET['confirm'])){
+					
+					//elimina collegamenti con tags
+					$transactiontags = Transactiontag::find(
+						'all',
+						array(
+							'conditions' => array('transaction_id = ?', $transaction->id)
+						)
+					);
+					foreach ($transactiontags as $transactiontag) 
+						$transactiontag->delete();
+					
 					$transaction->delete();
 					conf('confermata cancellazione voce');
 				}
