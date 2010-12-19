@@ -469,12 +469,14 @@
 		$date = "";
 		$category = 0;
 		$note = "";
+		$tags = "";
 		if (isset($_SESSION['temp']['newtransaction'])){
 			$description = $_SESSION['temp']['newtransaction']['description'];
 			$import = $_SESSION['temp']['newtransaction']['import'];
 			$category = $_SESSION['temp']['newtransaction']['category_id'];
 			$date = $_SESSION['temp']['newtransaction']['date'];
 			$note = $_SESSION['temp']['newtransaction']['note'];
+			$tags = "aa";//$_SESSION['temp']['newtransaction']['tags'];
 			unset($_SESSION['temp']['newtransaction']);
 			echo '<script>$(document).ready(function() {$(\'div#addTransactionForm\').show();})</script>';
 		}
@@ -510,6 +512,14 @@
 				
 				Data:<br>
 				<input type="text" id="datepicker" name="date" value="<?php echo $date; ?>"><br>
+				
+				Tags:<br>
+				<input id="tags" name="tags" value="<?php echo $tags; ?>"><br>
+
+				<?php
+					//include codice per gestione autocompletamento
+					include('autocomptag.php');
+				?>
 
 				Note:<br>
 				<textarea style="max-height:100px;" name="note"><?php echo $note; ?></textarea><br>
