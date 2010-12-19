@@ -104,8 +104,8 @@
 
 	function printTotal($text, $import){
 		echo '<div class="transaction transactionTotal ';
-		if ($import >= 0) echo 'positive';
-		if ($import < 0) echo 'negative';
+		if ($import >= 0) echo 'positiveTot';
+		if ($import < 0) echo 'negativeTot';
 		echo '">';
 		echo '<div class="transactionId">';
 		echo '</div>';

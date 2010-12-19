@@ -538,6 +538,7 @@
 		// composizione delle date del filtro del mese attuale
 		$datemin = date("Y-m-d", mktime(0, 0, 0, $month, 1, $year));
 		$datemax = date("Y-m-d", mktime(0, 0, 0, $month+1, 0, $year));
+		$datetoday = date("Y-m-d");
 
 		// ricerca importo precedenti al mese selezionato
 		$prevTransactions = Transaction::find(
@@ -552,11 +553,19 @@
 			$prevTotale = $prevTransactions[0]->sum_imports;
 		}
 		
-		// ricerca transazioni mese corrente
-		$transactions = Transaction::find(
+		// ricerca transazioni mese corrente (fino al giorno corrente)
+		$transactionsBefore = Transaction::find(
 			'all',
 			array(
-				'conditions' => array('account_id = ? AND date >= ? and DATE <= ?', $conto->id, $datemin, $datemax),
+				'conditions' => array('account_id = ? AND date >= ? and DATE <= ?', $conto->id, $datemin, $datetoday),
+				'order' => 'date asc'
+			)
+		);
+		// ricerca transazioni mese corrente (dopo il giorno corrente)
+		$transactionsAfter = Transaction::find(
+			'all',
+			array(
+				'conditions' => array('account_id = ? AND date > ? and DATE <= ?', $conto->id, $datetoday, $datemax),
 				'order' => 'date asc'
 			)
 		);
@@ -627,7 +636,14 @@
 		printTotal("Saldo a inizio mese", $prevTotale);
 
 		$totale = $prevTotale;
-		foreach ($transactions as $transaction){
+		foreach ($transactionsBefore as $transaction){
+			printTransaction($transaction);
+			$totale += $transaction->import;
+		}
+		
+		printTotal("Saldo a oggi", $totale);	
+
+		foreach ($transactionsAfter as $transaction){
 			printTransaction($transaction);
 			$totale += $transaction->import;
 		}
@@ -636,19 +652,6 @@
 		printTotal("Saldo a fine mese", $totale);
 		
 		echo '</fieldset>';
-		
-		$transactions = Transaction::find(
-			'all',
-			array(
-				'select' => 'sum(import) as sum_imports',
-				'conditions' => array('account_id = ? AND date >= ? and DATE <= ?', $conto->id, $datemin, $datemax),
-				'order' => 'date asc'
-			)
-		);
-		
-		$transaction = $transactions[0];
-		echo $transaction->sum_imports.' - ';
-			
 
 	}
 

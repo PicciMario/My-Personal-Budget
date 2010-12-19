@@ -159,6 +159,13 @@
 	background-color:#F78181;
 }
 
+.positiveTot{
+	background-color:yellow;
+}
+.negativeTot{
+	background-color:yellow;
+}
+
 .note{
 	//background-color:yellow;
 }
