@@ -36,37 +36,77 @@
 		//1 = nome conto di appartenenza
 		
 		if ($transaction == null) return;
+		
 		$import = $transaction->import;
+		
+		//div principale transazione
 		echo '<div class="transaction ';
+		
+		//sceglie colore transazione
 		if ($import >= 0) echo 'positive';
 		if ($import < 0) echo 'negative';
+		
 		echo '">';
+		
+		//id transazione
 		echo '<div class="transactionId">';
 			echo '<img src="images/downTriangle.png" onclick="mostraDiv(\'transNote'.$transaction->id.'\')"/>';
 		echo '</div>';
+		
+		//data transazione
 		echo '<div class="transactionDate">';
 			echo $transaction->date->format("d/m/y");
 		echo '</div>';
+		
+		//descrizione transazione
 		echo '<div class="transactionDescr">';
 			echo $transaction->description;
 		echo '</div>';
+		
+		//categoria (o account) transazione
 		echo '<div class="transactionCat">';
 			if ($descr == 0)
 				echo $transaction->category->name;
 			elseif ($descr == 1)
 				echo $transaction->account->description;
 		echo '</div>';
+		
+		//importo transazione
 		echo '<div class="transactionValue">';
 			printf("%01.2f €", $import);
 		echo '</div>';
 		echo '</div>';
 		
+		//note transazione
 		echo '<div id="transNote'.$transaction->id.'" style="display:none;" class="transactionNote note">';
-		echo '<div class="toolbar">';
-		echo '<a href="account.php?action=deletetransaction&transactionid='.$transaction->id.'" class=toolbarButton>';
-		echo 'Elimina voce</a>';
-		echo '</div>';
-		echo nl2br(htmlspecialchars($transaction->note));
+		
+			//toolbar note transazione
+			echo '<div class="toolbar">';
+			echo '<a href="account.php?action=deletetransaction&transactionid='.$transaction->id.'" class=toolbarButton>';
+			echo 'Elimina voce</a>';
+			echo '</div>';
+			
+			//testo note alla transazione
+			echo '<div>';
+			echo nl2br(htmlspecialchars($transaction->note));
+			echo '</div>';
+			
+			//elenco tags
+			echo '<div class="tagbar">';
+			//ricerca tags
+			$transactiontags = Transactiontag::find(
+				'all',
+				array(
+					'conditions' => array('transaction_id = ?', $transaction->id),
+					'include' => array('tag')
+				)
+			);
+			//stampa elenco tags
+			if (count($transactiontags) > 0) echo 'TAGS: ';
+			foreach ($transactiontags as $transactiontag) 
+				echo '<div class="tagbarButton">'.$transactiontag->tag->name.'</div>';
+			echo '</div>';
+		
 		echo '</div>';
 		
 	}

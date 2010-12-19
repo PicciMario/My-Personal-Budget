@@ -272,3 +272,38 @@
 .toolbarButton:active{
 	text-decoration:none;
 }
+
+/* Tags bar ----------------------------------------------------------------------- */
+
+.tagbar{
+	margin-top: 10px;
+	text-decoration:none;
+}
+.tagbarButton{
+	border: 1px solid #BDEDFF;
+	margin-right:3px;
+	width:70px;
+	padding:3px;
+	position:relative;
+	display:inline;
+	text-align:center;
+	background-color:#E0FFFF;
+	-moz-border-radius:5px;
+	border-radius:5px;
+	text-decoration:none;
+	color:blue;
+}
+.tagbarButton:hover{
+	background-color: #BDEDFF;
+	text-decoration:none;
+	color:blue;
+}
+.tagbarButton:visited{
+	text-decoration:none;
+}
+.tagbarButton:link{
+	text-decoration:none;
+}
+.tagbarButton:active{
+	text-decoration:none;
+}

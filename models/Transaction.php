@@ -18,5 +18,10 @@
 			array('account')
 		);
 		
+		static $has_many = array(
+			array('transactiontags'),
+			array('tags', 'through' => 'transactiontags')
+		);
+		
 	}
 ?>
