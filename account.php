@@ -289,6 +289,24 @@
 			// NEWTRANSACTION - crea nuova transazione
 			case "newtransaction":
 			
+				if (!isset($_SESSION['userid'])){
+					err("Utente non valido");
+					break;
+				}
+					
+				//individuo utente
+				$user = User::first( 
+					array(
+						'conditions' => array('id = ?', $_SESSION['userid'])
+					)
+				);
+				
+				//se utente non valido interrompo
+				if ($user == null){
+					err('Errore: passato ID di utente inesistente.');
+					break;
+				}
+			
 				//parametri passati da POST
 				//importante: i nomi devono essere uguali a quelli passati da
 				//form, i quali a loro volta devono essere uguali ai nomi dei
@@ -298,7 +316,8 @@
 					'import',
 					'category_id',
 					'date',
-					'note'
+					'note',
+					'tags'
 				);
 				
 				//verifica presenza e acquisizione parametri
@@ -328,6 +347,11 @@
 				}
 				$newValue['account_id'] = $_SESSION['accountid'];
 				
+				//estrazione lista tags da parametri
+				$tagstring = $newValue['tags'];
+				unset($newValue['tags']);
+				$taglist = explode(",", $tagstring);
+				
 				//creazione nuovo oggetto e salvataggio
 				$transaction = new Transaction($newValue);
 				$result = $transaction->save();
@@ -339,11 +363,75 @@
 						$errors .= '<li>'.$msg;
 					$errors .= '</ul>';
 					echo $errors;
+					break;
 				}
 				else {
 					conf('Nuova transazione "'.$transaction->description.'" creata correttamente');
 					unset($_SESSION['temp']['newtransaction']);
 				}
+				
+				//recupero la transizione (per import e description)
+				$transaction = Transaction::last(
+					array(
+						'conditions' => array('import = ? AND description = ?', 
+							$newValue['import'], $newValue['description'])
+					)
+				);
+				
+				//salva la lista tags
+				foreach ($taglist as $tagname){
+					$tagname = trim($tagname);
+					if (strlen($tagname) == 0) continue;
+					
+					//verifico se il tag esiste già per l'utente
+					$tag = Tag::first(
+						array(
+							'conditions' => 
+								array('user_id = ? AND name = ?', $user->id, $tagname)
+						)
+					);
+					
+					//se non esiste lo creo
+					if ($tag == null){
+						$tag = new Tag( 
+							array(
+								'name' => $tagname,
+								'user_id' => $user->id
+							)
+						);
+						$tag->save();
+						
+						//recupero il tag salvato
+						$tag = Tag::first(
+							array(
+								'conditions' => 
+									array('user_id = ? AND name = ?', $user->id, $tagname)
+							)
+						);
+					}
+					
+					//associo il tag alla transazione
+					$transactiontag = new Transactiontag(
+						array(
+							'transaction_id' => $transaction->id,
+							'tag_id' => $tag->id
+						)
+					);
+					$result = $transactiontag->save();
+					
+					//gestione errori
+					if ($result == false){
+						$errors = '<ul class="error" style="padding:10px 10px 10px 20px;">';
+						$errors .= '<li>Impossibile associare il tag: '.$tag->name;
+						foreach ($transactiontag->errors as $msg)
+							$errors .= '<li>-- '.$msg;
+						$errors .= '</ul>';
+						echo $errors;
+						break;
+					}
+	
+					
+				}			
 				
 				break;
 				
