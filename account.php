@@ -166,8 +166,20 @@
 				}
 
 				if (isset($_GET['confirm'])){
-					foreach($account->transactions as $transaction)
+					foreach($account->transactions as $transaction){
+						//elimina collegamenti con tags
+						$transactiontags = Transactiontag::find(
+							'all',
+							array(
+								'conditions' => array('transaction_id = ?', $transaction->id)
+							)
+						);
+						foreach ($transactiontags as $transactiontag){
+							$transactiontag->delete();
+						}
+						//elimina la transazione
 						$transaction->delete();
+					}
 					$account->delete();
 					conf('confermata cancellazione del conto');
 					if ($_SESSION['accountid'] == $account->id)
