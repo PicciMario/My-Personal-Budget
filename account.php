@@ -399,7 +399,18 @@
 								'user_id' => $user->id
 							)
 						);
-						$tag->save();
+						$result = $tag->save();
+						
+						//gestione errori nella creazione nuovo tag
+						if ($result == false){
+							$errors = '<ul class="error" style="padding:10px 10px 10px 20px;">';
+							$errors .= '<li>Impossibile creare il tag: '.$tag->name;
+							foreach ($tag->errors as $msg)
+								$errors .= '<li>-- '.$msg;
+							$errors .= '</ul>';
+							echo $errors;
+							break;
+						}
 						
 						//recupero il tag salvato
 						$tag = Tag::first(
@@ -408,6 +419,11 @@
 									array('user_id = ? AND name = ?', $user->id, $tagname)
 							)
 						);
+						
+						if ($tag == null) {
+							err('Errore nella creazione di un nuovo tag');
+							break;
+						}
 					}
 					
 					//associo il tag alla transazione
