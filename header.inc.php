@@ -10,7 +10,7 @@
 		$cfg->set_connections(array('development' => 'sqlite://my_database.db'));
 	});
 	
-	include_once('printfunctions.inc.php');
+	include_once('include/printfunctions.inc.php');
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

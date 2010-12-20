@@ -518,7 +518,7 @@
 
 				<?php
 					//include codice per gestione autocompletamento
-					include('autocomptag.php');
+					include_once('include/autocomptag.php');
 				?>
 
 				Note:<br>
