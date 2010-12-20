@@ -178,9 +178,9 @@
 	<hr>
 	
 	<!-- Header -->
-	<div class="span-18">
-		<h3>Gestione Contabilit&agrave; personale.</h3>
-		<p>Software messo assieme alla meno peggio ma comunque interessante :-)</p>
+	<div class="span-17 colborder">
+		<h3>My Personal Budget.</h3>
+		<p>Tu spendi, io prendo nota. Tu incassi, io prendo nota. Semplice.</p>
 	</div>
 	
 	<div class="span-6 last">
@@ -190,6 +190,17 @@
 				echo '<a id="logoutlink" href="index.php?logout">Esci: '.$_SESSION['username'].'</a>';
 				echo '</div>';
 			}
+			else{
+				?>
+				<div style="text-align:right;">
+				<form action="index.php" method=post>
+				Username: <input type="text" name="username"></input>
+				Password: <input type="password" name="password"></input>
+				<input type=submit value="Login">
+				</form>
+				</div>
+				<?php
+			}
 		?>
 	</div>
 	
@@ -198,15 +209,7 @@
 	<?php
 	
 	if (!isset($_SESSION['userid'])){
-		?>
-		<div style="background-color:#E0FFFF; text-align:right;">
-		<form action="index.php" method=post class="inline">
-		Username: <input type="text" name="username"></input>
-		Password: <input type="password" name="password"></input>
-		<input type=submit value="Login">
-		</form>
-		</div>
-		<?php
+
 	}
 	
 	?>

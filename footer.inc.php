@@ -5,25 +5,25 @@
 	spazio in affitto :-)
 	</div>
 	
-	<hr>
-	
-	<!-- Footer -->
-	<div class="span-15 colborder">
-		<p><strong>FOOTER</strong></p>
-		<p>testo footer</p>
-	</div>
-	<div class="span-8 last">
-		<p><strong>FOOTER</strong></p>
-		<p>testo footer</p>
-	</div>
-	
-	<hr>
-	
-	<!-- Footer -->
 	<div class="span-24 last">
-		<p><strong>FOOTER</strong></p>
-		<p>testo footer</p>
+	&nbsp;
 	</div>
+	
+	<hr>
+	
+	<!-- Footer -->
+	<div class="span-16">
+		&nbsp;
+	</div>
+	<div class="span-8 last" style="font-style:italic;">
+		<p>
+		Copyright (c) 2010 <a href="mailto:mario.piccinelli@gmail.com">mario.piccinelli@gmail.com</a><br>
+		Rilasciato sotto <a href="http://it.wikipedia.org/wiki/Licenza_MIT">licenza MIT</a><br>
+		Scarica l'ultima versione da <a href="https://github.com/PicciMario/My-Personal-Budget">GitHub</a>
+		</p>
+	</div>
+	
+	<hr>
 	
 </div>
 </body>
