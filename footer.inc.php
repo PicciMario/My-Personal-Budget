@@ -4,7 +4,35 @@
 	<script>
 		$(function() {
 			$( ".toolbarButton" ).button();
+			
+			$( ".toolbarButtonLeft" ).button({
+				text:false,
+				icons: {
+					primary: "ui-icon-seek-prev"
+				}
+			});
+			
+			$( ".toolbarButtonRight" ).button({
+				text:false,
+				icons: {
+					primary: "ui-icon-seek-next"
+				}
+			});
+			
+			$( ".toolbarButtonNew" ).button({
+				icons: {
+					primary: "ui-icon-circle-plus"
+				}
+			});
+			
 			$( ".toolbar" ).addClass("ui-widget-header ui-corner-all");
+			
+   			$("a#logoutlink").button({
+				icons: {
+					primary: "ui-icon-power"
+				}	
+   			});
+
 		});
 	</script>
 	

@@ -38,14 +38,7 @@
 		
 		<!-- CSS applicazione -->
 		<link type="text/css" href="css/pmstyle.css" rel="stylesheet" />	
-   		
-   		<script>
-   		$(function(){
-   			$("a#logoutlink").button();
-   		}
-   		)
-   		</script>
-   
+
 		<script>
 			function mostraDiv(divname){
 				$("#"+divname).toggle();
@@ -187,7 +180,7 @@
 			<?php
 			if (isset($_SESSION['username'])){
 				echo '<div style="text-align:right;">';
-				echo '<a id="logoutlink" href="index.php?logout">Esci: '.$_SESSION['username'].'</a>';
+				echo '<a id="logoutlink" href="index.php?logout">'.$_SESSION['username'].'</a>';
 				echo '</div>';
 			}
 			else{

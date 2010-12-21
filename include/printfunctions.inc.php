@@ -81,7 +81,7 @@
 		echo '<div id="transNote'.$transaction->id.'" style="display:none;" class="transactionNote note">';
 		
 			//toolbar note transazione
-			echo '<div class="toolbar">';
+			echo '<div class="simpleToolbar">';
 			echo '<a href="account.php?action=deletetransaction&transactionid='.$transaction->id.'" class=toolbarButton>';
 			echo 'Elimina voce</a>';
 			echo '</div>';
@@ -104,7 +104,7 @@
 			//stampa elenco tags
 			if (count($transactiontags) > 0) echo 'TAGS: ';
 			foreach ($transactiontags as $transactiontag) 
-				echo '<div class="tagbarButton">'.$transactiontag->tag->name.'</div>';
+				echo '<div class="toolbarButton">'.$transactiontag->tag->name.'</div>';
 			echo '</div>';
 		
 		echo '</div>';

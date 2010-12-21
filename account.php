@@ -46,7 +46,7 @@
 				
 
 				<div class="toolbar">
-					<a href="#" class="toolbarButton" id="addTransaction" onclick="mostraDivSlow('addAccountForm')">Nuovo conto</a>
+					<a href="#" class="toolbarButtonNew" id="addTransaction" onclick="mostraDivSlow('addAccountForm')">Nuovo conto</a>
 				</div>	
 				
 				<div id="addAccountForm" style="display:none">
@@ -528,7 +528,7 @@
 		?>
 		<div class="toolbar">
 			<a href="account.php?action=listaccount" class="toolbarButton">Lista conti</a>
-			<a href="#" onclick="mostraDivSlow('addTransactionForm')" class="toolbarButton" id="addTransaction">Nuova voce</a>
+			<a href="#" onclick="mostraDivSlow('addTransactionForm')" class="toolbarButtonNew" id="addTransaction">Nuova voce</a>
 		</div>	
 		
 		<?php
@@ -726,13 +726,14 @@
 		echo '<fieldset><legend>'.$conto->description.' - '.$month.'/'.$year.'</legend>';
 		
 		//barra di cambio mese
-		echo '<div class="toolbar">';
+		echo '<div>';
 		echo '<div align=center>';
-		echo '<a href="account.php?year='.$prevyear.'&month='.$prevmonth.'" class="toolbarButton">&lt;&lt;&lt;</a>';
+		echo '<a href="account.php?year='.$prevyear.'&month='.$prevmonth.'" class="toolbarButtonLeft">&lt;&lt;&lt;</a>';
 		echo '<a href="account.php" class="toolbarButton">Oggi</a>';
 		echo '<a href="#" class="toolbarButton" onclick="mostraDiv(\'selectPeriod\')">Scegli...</a>';
-		echo '<a href="account.php?year='.$nextyear.'&month='.$nextmonth.'" class="toolbarButton">&gt;&gt;&gt;</a>';
+		echo '<a href="account.php?year='.$nextyear.'&month='.$nextmonth.'" class="toolbarButtonRight">&gt;&gt;&gt;</a>';
 		echo '</div>';
+		echo '<p>';
 		echo '</div>';
 		?>
 		<div align="center" id="selectPeriod" style="display:none;">

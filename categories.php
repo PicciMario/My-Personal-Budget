@@ -248,7 +248,7 @@
 			?>
 				
 			<div class="toolbar">
-				<a href="#" onclick="mostraDivSlow('addCategoryForm')" class="toolbarButton" id="addCategory">Nuova categoria</a>
+				<a href="#" onclick="mostraDivSlow('addCategoryForm')" class="toolbarButtonNew" id="addCategory">Nuova categoria</a>
 			</div>
 				
 			<div id="addCategoryForm" style="display:none">
