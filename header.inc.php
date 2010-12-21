@@ -206,13 +206,6 @@
 	
 	<!-- Login -->
 	<div class="span-24 last">
-	<?php
-	
-	if (!isset($_SESSION['userid'])){
-
-	}
-	
-	?>
 	</div>	
 	
 	<hr>
@@ -237,6 +230,9 @@
 		?>
 	</div>	
 	
+	<script>
+		$( ".sbarlink" ).button();
+	</script>
 
 	<!-- Corpo della pagina -->
 	<div class="column span-18">

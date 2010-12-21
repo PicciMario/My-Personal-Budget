@@ -530,6 +530,7 @@
 			<a href="account.php?action=listaccount" class="toolbarButton">Lista conti</a>
 			<a href="#" onclick="mostraDivSlow('addTransactionForm')" class="toolbarButton" id="addTransaction">Nuova voce</a>
 		</div>	
+		
 		<?php
 		
 		if (!isset($_SESSION['userid'])){

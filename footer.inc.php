@@ -1,6 +1,13 @@
 	<br>
 	</div>
 	
+	<script>
+		$(function() {
+			$( ".toolbarButton" ).button();
+			$( ".toolbar" ).addClass("ui-widget-header ui-corner-all");
+		});
+	</script>
+	
 	<div class="column span-3 last">
 	spazio in affitto :-)
 	</div>
