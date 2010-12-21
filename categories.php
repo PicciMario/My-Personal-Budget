@@ -166,6 +166,53 @@
 		
 		switch ($action){
 			
+			// NEWCATEGORY - crea nuova categoria
+			case "newcategory":
+			
+				//parametri passati da POST
+				//importante: i nomi devono essere uguali a quelli passati da
+				//form, i quali a loro volta devono essere uguali ai nomi dei
+				//record della tabella interessata!
+				$parametri = array(
+					'name',
+					'description'
+				);
+				
+				//verifica presenza e acquisizione parametri
+				$newValue = array();
+				foreach ($parametri as $parametro){
+					if (!isset($_POST[$parametro])){
+						err('Non sono stati passati tutti i parametri necessari (manca '.$parametro.').');
+						break;					
+					}else{
+						$newValue[$parametro] = $_POST[$parametro];
+					}
+				}
+				
+				//impostazione parametri mancanti (non passati da POST)
+				if (!isset($_SESSION['userid'])){
+					error('Parametro user id non impostato');
+					break;
+				}
+				$newValue['user_id'] = $_SESSION['userid'];
+				
+				//creazione nuovo oggetto e salvataggio
+				$category = new Category($newValue);
+				$result = $category->save();
+				
+				//verifica salvataggio
+				if ($result == false){
+					$errors = '<ul class="error" style="padding:10px 10px 10px 20px;">';
+					foreach ($category->errors as $msg)
+						$errors .= '<li>'.$msg;
+					$errors .= '</ul>';
+					echo $errors;
+				}
+				else {
+					conf('Nuova categoria "'.$category->description.'" creata correttamente');
+				}
+				
+				break;
 
 			default:
 				err("Passato parametro action sconosciuto: ".$_POST['action']);
@@ -205,12 +252,14 @@
 			</div>
 				
 			<div id="addCategoryForm" style="display:none">
-				<form action="category.php" method="post">
+				<form action="categories.php" method="post">
 				<fieldset>
 					<legend>Aggiungi Categoria</legend>
 					
+					Nome:<br>
+					<input type="text" name="name"><br>
 					Descrizione:<br>
-					<input type="text" size=60 name="name"><br>
+					<input type="text" size=60 name="description"><br>
 					
 					<input type=hidden name="action" value="newcategory">
 					
