@@ -445,7 +445,6 @@
 						echo $errors;
 						break;
 					}
-	
 					
 				}			
 				

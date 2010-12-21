@@ -198,6 +198,31 @@
 				break;
 			}
 			
+			?>
+				
+			<div class="toolbar">
+				<a href="#" onclick="mostraDivSlow('addCategoryForm')" class="toolbarButton" id="addCategory">Nuova categoria</a>
+			</div>
+				
+			<div id="addCategoryForm" style="display:none">
+				<form action="category.php" method="post">
+				<fieldset>
+					<legend>Aggiungi Categoria</legend>
+					
+					Descrizione:<br>
+					<input type="text" size=60 name="name"><br>
+					
+					<input type=hidden name="action" value="newcategory">
+					
+					<input type=submit value="Salva">
+					<input type=button id="closeTransactionForm" onclick="mostraDivSlow('addCategoryForm')" value="Annulla">
+	
+				</fieldset>
+				</form>
+			</div>
+		
+			<?php
+			
 			//elenco categorie per l'utente
 			$categories = Category::find(
 				'all',
