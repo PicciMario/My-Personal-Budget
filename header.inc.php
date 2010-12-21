@@ -165,7 +165,7 @@
 <div class="container">
 
 	<div class="span-24 last">
-		Gestione contabilit&agrave; by <a href="mailto:mario.piccinelli@gmail.com">PicciMario</a>
+		Applicazione ottimizzata per Firefox, Safari e Google Chrome.. Se hai Internet Explorer mi spiace ma sono affari tuoi.
 	</div>
 	
 	<hr>

@@ -673,21 +673,46 @@
 		}
 
 		// composizione delle date del filtro del mese attuale
+		$date1stJan = date("Y-m-d", mktime(0, 0, 0, 1, 1, $year));
 		$datemin = date("Y-m-d", mktime(0, 0, 0, $month, 1, $year));
 		$datemax = date("Y-m-d", mktime(0, 0, 0, $month+1, 0, $year));
 		$datetoday = date("Y-m-d");
 
-		// ricerca importo precedenti al mese selezionato
-		$prevTransactions = Transaction::find(
+		//-----------------------------------------------------------------------------------------------------
+
+		// ricerca saldo a inizio anno
+		$prevYearsTransactions = Transaction::find(
 			'all',
 			array(
 				'select' => 'sum(import) as sum_imports',
-				'conditions' => array('account_id = ? AND date < ?', $conto->id, $datemin),
+				'conditions' => array('account_id = ? AND date < ?', $conto->id, $date1stJan),
 			)
 		);
-		$prevTotale = 0;
-		if ($prevTransactions != null){
-			$prevTotale = $prevTransactions[0]->sum_imports;
+		$prevYears = 0;
+		if ($prevYearsTransactions != null){
+			$prevYears = $prevYearsTransactions[0]->sum_imports;
+		}
+		
+		//ricerca saldi storici di tutti i mesi dell'anno in corso
+		$prevMonthsTransactions = array();
+		for ($i = 1; $i < $month; $i++){
+			$beginMonth = date("Y-m-d", mktime(0, 0, 0, $i, 1, $year));
+			$endMonth = date("Y-m-d", mktime(0, 0, 0, $i+1, 0, $year));
+			$prevMonth = Transaction::find(
+				'all',
+				array(
+					'select' => 'sum(import) as sum_imports',
+					'conditions' => array('account_id = ? AND date >= ? AND date <= ?', $conto->id, $beginMonth, $endMonth),
+				)
+			);
+			if ($prevMonth != null){
+				$newElement = array(
+					'anno' => $year,
+					'mese' => $i,
+					'valore' => $prevMonth[0]->sum_imports
+				);
+				array_push($prevMonthsTransactions, $newElement);
+			}
 		}
 		
 		// ricerca transazioni mese corrente (fino al giorno corrente)
@@ -706,6 +731,8 @@
 				'order' => 'date asc'
 			)
 		);
+		
+		//-----------------------------------------------------------------------------------------------------
 		
 		//calcola mese precedente
 		$prevyear = $year;
@@ -769,25 +796,49 @@
 		<?php
 		
 		echo '<hr>';
-	
+		
+		//-----------------------------------------------------------------------------------------------------
+		
+		//saldo inizio esercizio
+		$saldoProgressivo = $prevYears;
+			
+		echo '<div style="display:none" id="saldiStorici">';
+			
+			printTotal('Saldo inizio anno', $saldoProgressivo);
+			
+			//saldo alla fine di ogni mese precedente al mese selezionato
+			foreach ($prevMonthsTransactions as $prevMonthsTransaction){
+				$saldoProgressivo += $prevMonthsTransaction['valore'];
+				printTotal('Saldo a fine '.
+					decodificaMese($prevMonthsTransaction['mese']).' '.
+					$prevMonthsTransaction['anno'], $saldoProgressivo);
+			}
+			
+		echo '</div>';
+		
+		//-----------------------------------------------------------------------------------------------------
+		
 		// Stampa storico
-		printTotal("Saldo a inizio mese", $prevTotale);
+		printTotal('Saldo a inizio mese <a href="#" onclick="mostraDiv(\'saldiStorici\')" >(Dettaglio)</a>', $saldoProgressivo);
 
-		$totale = $prevTotale;
+		$totale = $prevYears;
 		foreach ($transactionsBefore as $transaction){
 			printTransaction($transaction);
 			$totale += $transaction->import;
 		}
-		
-		printTotal("Saldo a oggi", $totale);	
+	
+		if ($year == date('Y') && $month == date('m')) 
+			printTotal("Saldo attuale", $totale);	
 
 		foreach ($transactionsAfter as $transaction){
 			printTransaction($transaction);
 			$totale += $transaction->import;
 		}
 		
+		//-----------------------------------------------------------------------------------------------------
+		
 		// Stampa totale conto attuale
-		printTotal("Saldo a fine mese", $totale);
+		printTotal("Saldo previsto a fine mese", $totale);
 		
 		echo '</fieldset>';
 
