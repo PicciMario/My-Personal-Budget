@@ -74,12 +74,12 @@
 		//importo transazione
 		if ($import >= 0) {
 			echo '<div class="transactionValue">';
-				echo number_format($import, 2, ',', '\'').' €';
-			echo '</div>';
+				echo formattaImporto($import);
+				echo '</div>';
 		}
 		else{
 			echo '<div class="transactionValue2">';
-				echo number_format($import, 2, ',', '\'').' €';
+				echo formattaImporto($import);
 			echo '</div>';
 		}
 		
@@ -171,12 +171,12 @@
 		//importo totale
 		if ($import >= 0){
 			echo '<div class="transactionTotValue">';
-				echo number_format($import, 2, ',', '\'').' €';
+				echo formattaImporto($import);
 			echo '</div>';
 		}
 		else{
 			echo '<div class="transactionTotValue2">';
-				echo number_format($import, 2, ',', '\'').' €';
+				echo formattaImporto($import);
 			echo '</div>';
 		}
 		
@@ -205,6 +205,21 @@
 			return $mesi[$mese];
 		else
 			return "";
+	}
+	
+	//************************************************************************************************
+	
+	function formattaImporto($valore){
+		return number_format($valore, 2, ',', '\'').' €';
+	}
+
+	//************************************************************************************************
+	
+	function inizioMese($month, $year){
+		return date("Y-m-d", mktime(0, 0, 0, $month, 1, $year));
+	}
+	function fineMese($month, $year){
+		return date("Y-m-d", mktime(0, 0, 0, $month+1, 0, $year));
 	}
 
 ?>

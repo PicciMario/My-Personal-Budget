@@ -12,10 +12,11 @@ use XmlWriter;
  *
  * <ul>
  * <li><b>only:</b> a string or array of attributes to be included.</li>
- * <li><b>exclude:</b> a string or array of attributes to be excluded.</li>
+ * <li><b>except:</b> a string or array of attributes to be excluded.</li>
  * <li><b>methods:</b> a string or array of methods to invoke. The method's name will be used as a key for the final attributes array
  * along with the method's returned value</li>
  * <li><b>include:</b> a string or array of associated models to include in the final serialized product.</li>
+ * <li><b>only_method:</b> a method that's called and only the resulting array is serialized
  * <li><b>skip_instruct:</b> set to true to skip the <?xml ...?> declaration.</li>
  * </ul>
  *
@@ -32,8 +33,8 @@ use XmlWriter;
  *   'include' => array('comments', 'posts' => array('only' => 'id'))
  * ));
  *
- * # exclude the password field from being included
- * $model->to_xml(array('exclude' => 'password')));
+ * # except the password field from being included
+ * $model->to_xml(array('except' => 'password')));
  * </code>
  *
  * @package ActiveRecord
@@ -44,6 +45,13 @@ abstract class Serialization
 	protected $model;
 	protected $options;
 	protected $attributes;
+
+	/**
+	 * The default format to serialize DateTime objects to.
+	 *
+	 * @see DateTime
+	 */
+	public static $DATETIME_FORMAT = 'iso8601';
 
 	/**
 	 * Set this to true if the serializer needs to create a nested array keyed
@@ -99,6 +107,7 @@ abstract class Serialization
 		$this->check_except();
 		$this->check_methods();
 		$this->check_include();
+		$this->check_only_method();        
 	}
 
 	private function check_only()
@@ -132,6 +141,16 @@ abstract class Serialization
 				if (method_exists($this->model, $method))
 					$this->attributes[$method] = $this->model->$method();
 			}
+		}
+	}
+	
+	private function check_only_method()
+	{
+		if (isset($this->options['only_method']))
+		{
+			$method = $this->options['only_method'];
+			if (method_exists($this->model, $method))
+				$this->attributes = $this->model->$method();
 		}
 	}
 
@@ -195,12 +214,10 @@ abstract class Serialization
 	 */
 	final public function to_a()
 	{
-		$date_format = Config::instance()->get_date_format();
-
 		foreach ($this->attributes as &$value)
 		{
 			if ($value instanceof \DateTime)
-				$value = $value->format($date_format);
+				$value = $value->format(self::$DATETIME_FORMAT);
 		}
 		return $this->attributes;
 	}
@@ -223,17 +240,33 @@ abstract class Serialization
 };
 
 /**
- * JSON serializer.
+ * Array serializer.
  *
  * @package ActiveRecord
  */
-class JsonSerializer extends Serialization
+class ArraySerializer extends Serialization
 {
 	public static $include_root = false;
 
 	public function to_s()
 	{
-		return json_encode(self::$include_root ? array(strtolower(get_class($this->model)) => $this->to_a()) : $this->to_a());
+		return self::$include_root ? array(strtolower(get_class($this->model)) => $this->to_a()) : $this->to_a();
+	}
+}
+
+/**
+ * JSON serializer.
+ *
+ * @package ActiveRecord
+ */
+class JsonSerializer extends ArraySerializer
+{
+	public static $include_root = false;
+
+	public function to_s()
+	{
+		parent::$include_root = self::$include_root;
+		return json_encode(parent::to_s());
 	}
 }
 
@@ -298,5 +331,42 @@ class XmlSerializer extends Serialization
 			$this->writer->writeElement($attr, $value);
 		}
 	}
+}
+
+/**
+ * CSV serializer.
+ *
+ * @package ActiveRecord
+ */
+class CsvSerializer extends Serialization
+{
+  public static $delimiter = ',';
+  public static $enclosure = '"';
+
+  public function to_s()
+  {
+    if (@$this->options['only_header'] == true) return $this->header();
+    return $this->row();
+  }
+
+  private function header()
+  {
+    return $this->to_csv(array_keys($this->to_a()));
+  }
+
+  private function row()
+  {
+    return $this->to_csv($this->to_a());
+  }
+
+  private function to_csv($arr)
+  {
+    $outstream = fopen('php://temp', 'w');
+    fputcsv($outstream, $arr, self::$delimiter, self::$enclosure);
+    rewind($outstream);
+    $buffer = trim(stream_get_contents($outstream));
+    fclose($outstream);
+    return $buffer;
+  }
 }
 ?>

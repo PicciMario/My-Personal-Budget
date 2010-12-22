@@ -64,26 +64,27 @@ CREATE TABLE transactions (
 	category_id integer,
 	date datetime,
 	import float,
+	auto int,
 	created_at varchar(30),
 	updated_at varchar(30)
 );
 
 INSERT INTO transactions (id, description, account_id, date, import, category_id) 
-	VALUES (1, "Maglietta", 1, '2010-01-31', -30, 2);
+	VALUES (1, "Maglietta", 1, '2010-01-31 00:00:00 CET', -30, 2);
 INSERT INTO transactions (id, description, account_id, date, import, category_id, note) 
-	VALUES (2, "Pizza a pranzo", 1, '2010-12-01', -5.50, 1, "mmm che buona :-)");
+	VALUES (2, "Pizza a pranzo", 1, '2010-12-01 00:00:00 CET', -5.50, 1, "mmm che buona :-)");
 INSERT INTO transactions (id, description, account_id, date, import, category_id) 
-	VALUES (3, "Pranzo con amici", 1, '2010-12-08', -25, 1);
+	VALUES (3, "Pranzo con amici", 1, '2010-12-08 00:00:00 CET', -25, 1);
 INSERT INTO transactions (id, description, account_id, date, import, category_id) 
-	VALUES (4, "Stipendio", 1, '2010-12-31', 1000, 3);
+	VALUES (4, "Stipendio", 1, '2010-12-31 00:00:00 CET', 1000, 3);
 INSERT INTO transactions (id, description, account_id, date, import, category_id) 
-	VALUES (5, "Stipendio", 1, '2010-11-30', 1000, 3);
+	VALUES (5, "Stipendio", 1, '2010-11-30 00:00:00 CET', 1000, 3);
 INSERT INTO transactions (id, description, account_id, date, import, category_id) 
-	VALUES (6, "Stipendio", 1, '2010-10-31', 1000, 3);
+	VALUES (6, "Stipendio", 1, '2010-10-31 00:00:00 CET', 1000, 3);
 INSERT INTO transactions (id, description, account_id, date, import, category_id) 
-	VALUES (7, "Stipendio", 1, '2010-09-30', 1000, 3);
+	VALUES (7, "Stipendio", 1, '2010-09-30 00:00:00 CET', 1000, 3);
 INSERT INTO transactions (id, description, account_id, date, import, category_id) 
-	VALUES (8, "Affitto appartamento", 2, '2010-12-01', -150, 2);
+	VALUES (8, "Affitto appartamento", 2, '2010-12-01 00:00:00 CET', -150, 2);
 
 -- **********************************************************************************************************
 

@@ -92,7 +92,13 @@ class Validations
 	{
 		$this->model = $model;
 		$this->record = new Errors($this->model);
-		$this->validators = array_intersect(array_keys(Reflections::instance()->get(get_class($this->model))->getStaticProperties()), self::$VALIDATION_FUNCTIONS);
+		$this->klass = Reflections::instance()->get(get_class($this->model));
+		$this->validators = array_intersect(array_keys($this->klass->getStaticProperties()), self::$VALIDATION_FUNCTIONS);
+	}
+
+	public function get_record()
+	{
+		return $this->record;
 	}
 
 	/**
@@ -103,13 +109,11 @@ class Validations
 	public function rules()
 	{
 		$data = array();
-		$reflection = Reflections::instance()->get(get_class($this->model));
-
 		foreach ($this->validators as $validate)
 		{
-			$attrs = $reflection->getStaticPropertyValue($validate);
+			$attrs = $this->klass->getStaticPropertyValue($validate);
 
-			foreach ($attrs as $attr)
+			foreach (wrap_strings_in_arrays($attrs) as $attr)
 			{
 				$field = $attr[0];
 
@@ -131,10 +135,16 @@ class Validations
 	 */
 	public function validate()
 	{
-		$reflection = Reflections::instance()->get(get_class($this->model));
-
 		foreach ($this->validators as $validate)
-			$this->$validate($reflection->getStaticPropertyValue($validate));
+		{
+			$definition = $this->klass->getStaticPropertyValue($validate);
+			$this->$validate(wrap_strings_in_arrays($definition));
+		}
+
+		$model_reflection = Reflections::instance()->get($this->model);
+
+		if ($model_reflection->hasMethod('validate') && $model_reflection->getMethod('validate')->isPublic())
+			$this->model->validate();
 
 		$this->record->clear_model();
 		return $this->record;
@@ -156,6 +166,8 @@ class Validations
 	 *
 	 * <ul>
 	 * <li><b>message:</b> custom error message</li>
+	 * <li><b>allow_blank:</b> allow blank strings</li>
+	 * <li><b>allow_null:</b> allow null strings</li>
 	 * </ul>
 	 *
 	 * @param array $attrs Validation definition
@@ -187,6 +199,8 @@ class Validations
 	 * <ul>
 	 * <li><b>in/within:</b> attribute should/shouldn't be a value within an array</li>
 	 * <li><b>message:</b> custome error message</li>
+	 * <li><b>allow_blank:</b> allow blank strings</li>
+	 * <li><b>allow_null:</b> allow null strings</li>
 	 * </ul>
 	 *
 	 * @param array $attrs Validation definition
@@ -199,6 +213,15 @@ class Validations
 	/**
 	 * This is the opposite of {@link validates_include_of}.
 	 *
+	 * Available options:
+	 *
+	 * <ul>
+	 * <li><b>in/within:</b> attribute should/shouldn't be a value within an array</li>
+	 * <li><b>message:</b> custome error message</li>
+	 * <li><b>allow_blank:</b> allow blank strings</li>
+	 * <li><b>allow_null:</b> allow null strings</li>
+	 * </ul>
+	 *
 	 * @param array $attrs Validation definition
 	 * @see validates_inclusion_of
 	 */
@@ -209,6 +232,15 @@ class Validations
 
 	/**
 	 * Validates that a value is in or out of a specified list of values.
+	 *
+	 * Available options:
+	 *
+	 * <ul>
+	 * <li><b>in/within:</b> attribute should/shouldn't be a value within an array</li>
+	 * <li><b>message:</b> custome error message</li>
+	 * <li><b>allow_blank:</b> allow blank strings</li>
+	 * <li><b>allow_null:</b> allow null strings</li>
+	 * </ul>
 	 *
 	 * @see validates_inclusion_of
 	 * @see validates_exclusion_of
@@ -265,6 +297,8 @@ class Validations
 	 * <li><b>equal_to:</b> ...</li>
 	 * <li><b>less_than:</b> ...</li>
 	 * <li><b>less_than_or_equal_to:</b> ...</li>
+	 * <li><b>allow_blank:</b> allow blank strings</li>
+	 * <li><b>allow_null:</b> allow null strings</li>
 	 * </ul>
 	 *
 	 * @param array $attrs Validation definition
@@ -287,16 +321,13 @@ class Validations
 			if ($this->is_null_with_option($var, $options))
 				continue;
 
+			$not_a_number_message = (isset($options['message']) ? $options['message'] : Errors::$DEFAULT_ERROR_MESSAGES['not_a_number']);
+
 			if (true === $options['only_integer'] && !is_integer($var))
 			{
 				if (!preg_match('/\A[+-]?\d+\Z/', (string)($var)))
 				{
-					if (isset($options['message']))
-						$message = $options['message'];
-					else
-						$message = Errors::$DEFAULT_ERROR_MESSAGES['not_a_number'];
-
-					$this->record->add($attribute, $message);
+					$this->record->add($attribute, $not_a_number_message);
 					continue;
 				}
 			}
@@ -304,7 +335,7 @@ class Validations
 			{
 				if (!is_numeric($var))
 				{
-					$this->record->add($attribute, Errors::$DEFAULT_ERROR_MESSAGES['not_a_number']);
+					$this->record->add($attribute, $not_a_number_message);
 					continue;
 				}
 
@@ -314,18 +345,14 @@ class Validations
 			foreach ($numericalityOptions as $option => $check)
 			{
 				$option_value = $options[$option];
+				$message = (isset($options['message']) ? $options['message'] : Errors::$DEFAULT_ERROR_MESSAGES[$option]);
 
 				if ('odd' != $option && 'even' != $option)
 				{
 					$option_value = (float)$options[$option];
 
 					if (!is_numeric($option_value))
-						throw new  ValidationsArgumentError("$option must be a number");
-
-					if (isset($options['message']))
-						$message = $options['message'];
-					else
-						$message = Errors::$DEFAULT_ERROR_MESSAGES[$option];
+						throw new ValidationsArgumentError("$option must be a number");
 
 					$message = str_replace('%d', $option_value, $message);
 
@@ -346,12 +373,7 @@ class Validations
 				}
 				else
 				{
-					if (isset($options['message']))
-						$message = $options['message'];
-					else
-						$message = Errors::$DEFAULT_ERROR_MESSAGES[$option];
-
-					if ( ('odd' == $option && !( Utils::is_odd($var))) || ('even' == $option && ( Utils::is_odd($var))))
+					if (('odd' == $option && !Utils::is_odd($var)) || ('even' == $option && Utils::is_odd($var)))
 						$this->record->add($attribute, $message);
 				}
 			}
@@ -384,6 +406,8 @@ class Validations
 	 * <ul>
 	 * <li><b>with:</b> a regular expression</li>
 	 * <li><b>message:</b> custom error message</li>
+	 * <li><b>allow_blank:</b> allow blank strings</li>
+	 * <li><b>allow_null:</b> allow null strings</li>
 	 * </ul>
 	 *
 	 * @param array $attrs Validation definition
@@ -428,6 +452,9 @@ class Validations
 	 * <li><b>is:</b> attribute should be exactly n characters long</li>
 	 * <li><b>in/within:</b> attribute should be within an range array(min,max)</li>
 	 * <li><b>maximum/minimum:</b> attribute should not be above/below respectively</li>
+	 * <li><b>message:</b> custome error message</li>
+	 * <li><b>allow_blank:</b> allow blank strings</li>
+	 * <li><b>allow_null:</b> allow null strings</li>
 	 * </ul>
 	 *
 	 * @param array $attrs Validation definition
@@ -538,6 +565,15 @@ class Validations
 	 *   );
 	 * }
 	 * </code>
+	 *
+	 * Available options:
+	 *
+	 * <ul>
+	 * <li><b>with:</b> a regular expression</li>
+	 * <li><b>message:</b> custom error message</li>
+	 * <li><b>allow_blank:</b> allow blank strings</li>
+	 * <li><b>allow_null:</b> allow null strings</li>
+	 * </ul>
 	 *
 	 * @param array $attrs Validation definition
 	 */
@@ -763,6 +799,32 @@ class Errors implements IteratorAggregate
 	{
 		$full_messages = array();
 
+		$this->to_array(function($attribute, $message) use (&$full_messages) {
+			$full_messages[] = $message;
+		});
+
+		return $full_messages;
+	}
+
+	/**
+	 * Returns all the error messages as an array, including error key.
+	 *
+	 * <code>
+	 * $model->errors->errors();
+	 *
+	 * # array(
+	 * #  "name" => "Name can't be blank",
+	 * #  "state" => "State is the wrong length (should be 2 chars)"
+	 * # )
+	 * </code>
+	 *
+	 * @param array $options Options for messages
+	 * @return array
+	 */
+	public function to_array($closure=null)
+	{
+		$errors = array();
+
 		if ($this->errors)
 		{
 			foreach ($this->errors as $attribute => $messages)
@@ -772,11 +834,30 @@ class Errors implements IteratorAggregate
 					if (is_null($msg))
 						continue;
 
-					$full_messages[] = Utils::human_attribute($attribute) . ' ' . $msg;
+					$errors[$attribute][] = ($message = Utils::human_attribute($attribute) . ' ' . $msg);
+
+					if ($closure)
+						$closure($attribute,$message);
 				}
 			}
 		}
-		return $full_messages;
+		return $errors;
+	}
+
+	/**
+	 * Convert all error messages to a String.
+	 * This function is called implicitely if the object is casted to a string:
+	 * 
+	 * <code>
+	 * echo $error;
+	 * 
+	 * # "Name can't be blank\nState is the wrong length (should be 2 chars)"
+	 * </code>
+	 * @return string
+	 */
+	public function __toString()
+	{
+		return implode("\n", $this->full_messages());
 	}
 
 	/**

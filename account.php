@@ -270,6 +270,112 @@
 	
 				break;
 				
+			// CLOSEMONTH - chiude il mese
+			case "closemonth":
+
+				if (!isset($_SESSION['userid'])){
+					err("Utente non valido");
+					break;
+				}
+					
+				//individuo utente
+				$user = User::first( 
+					array(
+						'conditions' => array('id = ?', $_SESSION['userid'])
+					)
+				);
+				
+				//se utente non valido interrompo
+				if ($user == null){
+					err('Errore: passato ID di utente inesistente.');
+					break;
+				}
+
+				//lettura conto da variabile sessione
+				if (!isset($_SESSION['accountid'])){
+					err('Nessun conto selezionato');
+					break;
+				}
+				$accountid = $_SESSION['accountid'];
+
+				//individua il conto richiesto
+				$account = Account::first( 
+					array(
+						'conditions' => array('id = ? AND user_id = ?', $accountid, $user->id)
+					)
+				);
+
+				//se conto non valido interrompo
+				if ($account == null){
+					err('Errore: passato ID di conto inesistente.');
+					break;
+				}
+			
+				//parametri passati da GET
+				$parametri = array(
+					'year',
+					'month'
+				);
+				
+				//verifica presenza e acquisizione parametri
+				foreach ($parametri as $parametro){
+					if (!isset($_GET[$parametro])){
+						err('Non sono stati passati tutti i parametri necessari (manca '.$parametro.').');
+						break;
+					}				
+				}
+				
+				$month = $_GET['month'];
+				$year = $_GET['year'];
+				
+				//saldo mese precedente
+				$saldo = 0;
+
+				$monthTrans = Transaction::find(
+					'all',
+					array(
+						'select' => 'sum(import) as sum_imports',
+						'conditions' => array('account_id = ? AND date >= ? AND date <= ?', 
+							$account->id, 
+							inizioMese($month, $year), 
+							fineMese($month, $year)
+						),
+					)
+				);
+				if ($monthTrans != null){
+					$saldo += $monthTrans[0]->sum_imports;
+				}
+
+				//creazione nuovo oggetto e salvataggio
+				$transaction = new Transaction(
+					array(
+						'description' => 'chiusura mese',
+						'account_id' => $account->id,
+						'category_id' => 0,
+						'date' => fineMese($month, $year),
+						'import' => $saldo,
+						'auto' => 1
+					)
+				);
+				$result = $transaction->save();
+				
+				//verifica salvataggio
+				if ($result == false){
+					$errors = '<ul class="error" style="padding:10px 10px 10px 20px;">';
+					foreach ($transaction->errors as $msg)
+						$errors .= '<li>'.$msg;
+					$errors .= '</ul>';
+					echo $errors;
+					break;
+				}
+				else {
+					conf('Nuova transazione "'.$transaction->description.'" creata correttamente');
+					unset($_SESSION['temp']['newtransaction']);
+				}	
+				
+				$showlist = 1;
+				break;
+				
 			default:
 				err("Passato parametro action sconosciuto: ".$_GET['action']);
 				break;
@@ -510,7 +616,8 @@
 				}
 				
 				break;
-
+		
+		
 			default:
 				err("Passato parametro action sconosciuto: ".$_POST['action']);
 				break;
@@ -526,10 +633,25 @@
 		
 		case 1:
 		
+		// Anno e mese attuali
+		$year = date('Y');
+		$month = date('m');
+		
+		// Anno e mese se passati da POST
+		if (isset($_GET['year']) && isset($_GET['month'])){
+			if (is_numeric($_GET['year']) && is_numeric($_GET['month'])){
+				$year = $_GET['year'];
+				$month = $_GET['month'];
+				if ($month > 12) $month = 12;
+				if ($month <= 0) $month = 1;
+			}
+		}
+		
 		?>
 		<div class="toolbar">
 			<a href="account.php?action=listaccount" class="toolbarButton">Lista conti</a>
 			<a href="#" onclick="mostraDivSlow('addTransactionForm')" class="toolbarButtonNew" id="addTransaction">Nuova voce</a>
+			<a href="account.php?action=closemonth&year=<?php echo $year;?>&month=<?php echo $month; ?>" class="toolbarButton">Chiudi mese</a>
 		</div>	
 		
 		<?php
@@ -658,26 +780,13 @@
 		</script>
 
 		<?php
-		
-		// Anno e mese attuali
-		$year = date('Y');
-		$month = date('m');
-		
-		// Anno e mese se passati da POST
-		if (isset($_GET['year']) && isset($_GET['month'])){
-			if (is_numeric($_GET['year']) && is_numeric($_GET['month'])){
-				$year = $_GET['year'];
-				$month = $_GET['month'];
-				if ($month > 12) $month = 12;
-				if ($month <= 0) $month = 1;
-			}
-		}
 
 		// composizione delle date del filtro del mese attuale
 		$date1stJan = date("Y-m-d", mktime(0, 0, 0, 1, 1, $year));
 		$datemin = date("Y-m-d", mktime(0, 0, 0, $month, 1, $year));
-		$datemax = date("Y-m-d", mktime(0, 0, 0, $month+1, 0, $year));
+		$datemax = date("Y-m-d", mktime(0, 0, 0, $month+1, 1, $year));
 		$datetoday = date("Y-m-d");
+		echo "min: $datemin - max: $datemax - today: $datetoday - 1stJan: $date1stJan ";
 
 		//-----------------------------------------------------------------------------------------------------
 
@@ -698,12 +807,12 @@
 		$prevMonthsTransactions = array();
 		for ($i = 1; $i < $month; $i++){
 			$beginMonth = date("Y-m-d", mktime(0, 0, 0, $i, 1, $year));
-			$endMonth = date("Y-m-d", mktime(0, 0, 0, $i+1, 0, $year));
+			$endMonth = date("Y-m-d", mktime(0, 0, 0, $i+1, 1, $year));
 			$prevMonth = Transaction::find(
 				'all',
 				array(
 					'select' => 'sum(import) as sum_imports',
-					'conditions' => array('account_id = ? AND date >= ? AND date <= ?', $conto->id, $beginMonth, $endMonth),
+					'conditions' => array('account_id = ? AND date >= ? AND date < ?', $conto->id, $beginMonth, $endMonth),
 				)
 			);
 			if ($prevMonth != null){
@@ -716,22 +825,48 @@
 			}
 		}
 		
-		// ricerca transazioni mese corrente (fino al giorno corrente)
-		$transactionsBefore = Transaction::find(
-			'all',
-			array(
-				'conditions' => array('account_id = ? AND date >= ? and DATE <= ?', $conto->id, $datemin, $datetoday),
-				'order' => 'date asc'
-			)
-		);
-		// ricerca transazioni mese corrente (dopo il giorno corrente)
-		$transactionsAfter = Transaction::find(
-			'all',
-			array(
-				'conditions' => array('account_id = ? AND date > ? and DATE <= ?', $conto->id, $datetoday, $datemax),
-				'order' => 'date asc'
-			)
-		);
+		
+		if ($year == date('Y') && $month == date('m')){
+			
+			echo 'mese corrente';
+		
+			// ricerca transazioni mese corrente (fino al giorno corrente)
+			$transactionsBefore = Transaction::find(
+				'all',
+				array(
+					'conditions' => array('account_id = ? AND date >= ? and date <= ?', $conto->id, $datemin, $datetoday),
+					'order' => 'date asc'
+				)
+			);
+	
+			// ricerca transazioni mese corrente (dopo il giorno corrente)
+			$transactionsAfter = Transaction::find(
+				'all',
+				array(
+					'conditions' => array('account_id = ? AND date > ? and date < ?', $conto->id, $datetoday, $datemax),
+					'order' => 'date asc'
+				)
+			);
+		
+		}
+		else{
+			
+			echo 'non mese corrente	';
+			
+			// annulla transazioni prima
+			$transactionsBefore = array();
+				
+			// ricerca transazioni
+			$transactionsAfter = Transaction::find(
+				'all',
+				array(
+					'conditions' => array('account_id = ? AND date >= ? and date < ?', $conto->id, $datemin, $datemax),
+					'order' => 'date asc'
+				)
+			);
+	
+		}
+
 		
 		//-----------------------------------------------------------------------------------------------------
 		
