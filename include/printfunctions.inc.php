@@ -74,12 +74,12 @@
 		//importo transazione
 		if ($import >= 0) {
 			echo '<div class="transactionValue">';
-				printf("%01.2f €", $import);
+				echo number_format($import, 2, ',', '\'').' €';
 			echo '</div>';
 		}
 		else{
 			echo '<div class="transactionValue2">';
-				if ($import < 0) printf("%01.2f €", $import);
+				echo number_format($import, 2, ',', '\'').' €';
 			echo '</div>';
 		}
 		
@@ -171,12 +171,12 @@
 		//importo totale
 		if ($import >= 0){
 			echo '<div class="transactionTotValue">';
-				printf("%01.2f €", $import);
+				echo number_format($import, 2, ',', '\'').' €';
 			echo '</div>';
 		}
 		else{
 			echo '<div class="transactionTotValue2">';
-				printf("%01.2f €", $import);
+				echo number_format($import, 2, ',', '\'').' €';
 			echo '</div>';
 		}
 		

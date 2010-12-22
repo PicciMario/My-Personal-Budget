@@ -225,7 +225,7 @@
 	width:90px;
 	height:18px;
 	overflow:hidden;
-	border: 1px solid red;
+	border: 1px solid darkred;
 	text-align: right;
 	padding-right:2px;
 	-moz-border-radius: 6px;
@@ -269,7 +269,7 @@
 	width:90px;
 	height:18px;
 	overflow:hidden;
-	border: 1px solid red;
+	border: 1px solid darkred;
 	text-align: right;
 	padding-right:2px;
 	-moz-border-radius: 6px;
