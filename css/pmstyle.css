@@ -144,13 +144,6 @@
 	background-color:#F78181;
 }
 
-.positiveTot{
-	background-color:yellow;
-}
-.negativeTot{
-	background-color:yellow;
-}
-
 .note{
 	//background-color:yellow;
 }
@@ -246,6 +239,13 @@
 	margin-left:100px;
 	margin-top:4px;
 	margin-bottom:4px;
+}
+
+.yellowTot{
+	background-color:yellow;
+}
+.orangeTot{
+	background-color:orange;
 }
 
 .transactionTotValue{

@@ -803,13 +803,18 @@
 		$saldoProgressivo = $prevYears;
 			
 		echo '<div style="display:none" id="saldiStorici">';
-			
-			printTotal('Saldo inizio anno', $saldoProgressivo);
+
+			printTotal(
+				'Saldo inizio anno', 
+				$saldoProgressivo,
+				1,
+				'<img src="images/downTriangle.png" onclick="mostraDiv(\'saldiStorici\')"/>'
+			);
 			
 			//saldo alla fine di ogni mese precedente al mese selezionato
 			foreach ($prevMonthsTransactions as $prevMonthsTransaction){
 				$saldoProgressivo += $prevMonthsTransaction['valore'];
-				printTotal('Saldo a fine '.
+				printTotal('Saldo di '.
 					decodificaMese($prevMonthsTransaction['mese']).' '.
 					$prevMonthsTransaction['anno'], $saldoProgressivo);
 			}
@@ -819,7 +824,12 @@
 		//-----------------------------------------------------------------------------------------------------
 		
 		// Stampa storico
-		printTotal('Saldo a inizio mese <a href="#" onclick="mostraDiv(\'saldiStorici\')" >(Dettaglio)</a>', $saldoProgressivo);
+		printTotal(
+			'Saldo inizio mese', 
+			$saldoProgressivo,
+			1,
+			'<img src="images/downTriangle.png" onclick="mostraDiv(\'saldiStorici\')"/>'
+		);
 
 		$totale = $prevYears;
 		foreach ($transactionsBefore as $transaction){
@@ -828,7 +838,7 @@
 		}
 	
 		if ($year == date('Y') && $month == date('m')) 
-			printTotal("Saldo attuale", $totale);	
+			printTotal("Saldo attuale", $totale, 1);	
 
 		foreach ($transactionsAfter as $transaction){
 			printTransaction($transaction);
@@ -838,7 +848,7 @@
 		//-----------------------------------------------------------------------------------------------------
 		
 		// Stampa totale conto attuale
-		printTotal("Saldo previsto a fine mese", $totale);
+		printTotal("Saldo previsto a fine mese", $totale, 1);
 		
 		echo '</fieldset>';
 

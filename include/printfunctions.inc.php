@@ -150,16 +150,24 @@
 
 	//************************************************************************************************
 
-	function printTotal($text, $import){
+	function printTotal($text, $import, $color=0, $id=""){
+		
 		echo '<div class="transaction transactionTotal ';
-		if ($import >= 0) echo 'positiveTot';
-		if ($import < 0) echo 'negativeTot';
+		if ($color == 0) echo 'yellowTot';
+		if ($color == 1) echo 'orangeTot';
 		echo '">';
+		
+		//id totale
 		echo '<div class="transactionId">';
+			echo $id;
 		echo '</div>';
+		
+		//descrizione totale
 		echo '<div class="transactionDescr">';
 			echo $text;
 		echo '</div>';
+		
+		//importo totale
 		if ($import >= 0){
 			echo '<div class="transactionTotValue">';
 				printf("%01.2f €", $import);
@@ -170,6 +178,7 @@
 				printf("%01.2f €", $import);
 			echo '</div>';
 		}
+		
 		echo '</div>';
 	}
 	
