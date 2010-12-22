@@ -260,7 +260,8 @@
 				}
 				else{
 					$mess = 'Procedo a eliminare la voce "'.$transaction->description.'"<br>';
-					$mess .= '<a href="account.php?action=deletetransaction&transactionid='.$transaction->id.'&confirm">';
+					$mess .= '<a href="account.php?action=deletetransaction&transactionid='.$transaction->id.'&confirm"';
+					$mess .= ' class="toolbarButtonDelete">';
 					$mess .= 'clicca per confermare';
 					$mess .= '</a>';
 					notice($mess);	

@@ -145,7 +145,7 @@
 }
 
 .note{
-	//background-color:yellow;
+	background-color:azure;
 }
 .note:hover{
 	//background-color:orange;
@@ -239,6 +239,7 @@
 	margin-left:100px;
 	margin-top:4px;
 	margin-bottom:4px;
+	padding:2px;
 }
 
 .yellowTot{

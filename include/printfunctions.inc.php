@@ -90,8 +90,9 @@
 		
 			//toolbar note transazione
 			echo '<div class="simpleToolbar">';
-			echo '<a href="account.php?action=deletetransaction&transactionid='.$transaction->id.'" class=toolbarButton>';
-			echo 'Elimina voce</a>';
+			echo '<a href="account.php?action=deletetransaction&transactionid='.$transaction->id.'"';
+			echo ' class=toolbarButtonDelete>';
+			echo 'Cancella</a>';
 			echo '</div>';
 			
 			//testo note alla transazione

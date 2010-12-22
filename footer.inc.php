@@ -25,6 +25,12 @@
 				}
 			});
 			
+			$( ".toolbarButtonDelete" ).button({
+				icons: {
+					primary: "ui-icon-circle-close"
+				}
+			});
+			
 			$( ".toolbar" ).addClass("ui-widget-header ui-corner-all");
 			
    			$("a#logoutlink").button({
