@@ -156,6 +156,7 @@
 		echo '<div class="transaction transactionTotal ';
 		if ($color == 0) echo 'yellowTot';
 		if ($color == 1) echo 'orangeTot';
+		if ($color == 2) echo 'blueTot';
 		echo '">';
 		
 		//id totale

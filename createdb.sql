@@ -85,6 +85,8 @@ INSERT INTO transactions (id, description, account_id, date, import, category_id
 	VALUES (7, "Stipendio", 1, '2010-09-30 00:00:00 CET', 1000, 3);
 INSERT INTO transactions (id, description, account_id, date, import, category_id) 
 	VALUES (8, "Affitto appartamento", 2, '2010-12-01 00:00:00 CET', -150, 2);
+	
+UPDATE transactions SET auto = 0;
 
 -- **********************************************************************************************************
 

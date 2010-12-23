@@ -310,39 +310,101 @@
 					err('Errore: passato ID di conto inesistente.');
 					break;
 				}
-			
-				//parametri passati da GET
+				
+				//verifica presenza e acquisizione parametri da GET
 				$parametri = array(
 					'year',
 					'month'
 				);
-				
-				//verifica presenza e acquisizione parametri
 				foreach ($parametri as $parametro){
 					if (!isset($_GET[$parametro])){
 						err('Non sono stati passati tutti i parametri necessari (manca '.$parametro.').');
 						break;
 					}				
-				}
-				
+				}			
 				$month = $_GET['month'];
 				$year = $_GET['year'];
 				
+				//calcolo date massima e minima per ricerca
+				$datemin = date("Y-m-d", mktime(0, 0, 0, $month, 1, $year));
+				$datemax = date("Y-m-d", mktime(0, 0, 0, $month+1, 1, $year));
+				debug('Date min: '.$datemin.' - Date max: '.$datemax);
+				
+				//elimino precedenti voci auto=1 nel mese
+				$precChiusure = Transaction::find(
+					'all',
+					array(
+						'conditions' => array('account_id = ? AND date >= ? AND date < ? AND auto = ?', 
+						//'conditions' => array('auto = ?',
+							$account->id, 
+							$datemin, 
+							$datemax,
+							1
+						),
+					)
+				);
+				debug('Eliminate '.count($precChiusure).' chiusure');
+				foreach($precChiusure as $transaction){
+					$transaction->delete();
+				}
+				
 				//saldo mese precedente
 				$saldo = 0;
+				$prevMonthStart = date("Y-m-d", mktime(0, 0, 0, $month-1, 1, $year));
+				$prevMonthEnd = date("Y-m-d", mktime(0, 0, 0, $month, 1, $year));
+				$saldoMesePrec = Transaction::first(
+					array(
+						'conditions' => array('account_id = ? AND date >= ? AND date < ? AND auto = ? AND category_id = ?', 
+							$account->id, 
+							$prevMonthStart,
+							$prevMonthEnd, 
+							1,
+							0
+						),
+						'order' => 'date desc'
+					)
+				);
+				if ($saldoMesePrec != null){
+					$saldo = $saldoMesePrec->import;
+					debug('Recuperato saldo mese precedente da chiusura: '.$saldo);
+				} else{
+					notice('Il mese precedente risulta aperto, rigenerato lo storico');
+					//totale movimenti precedenti al mese
+					$precTrans = Transaction::find(
+						'all',
+						array(
+							'select' => 'sum(import) as sum_imports',
+							'conditions' => array('account_id = ? AND date < ? AND auto = ?', 
+								$account->id, 
+								$datemin, 
+								0
+							),
+						)
+					);
+					if ($precTrans != null){
+						$saldo = $precTrans[0]->sum_imports;
+						debug('Recuperato saldo mese precedente mediante ricostruzione: '.$saldo);
+					}else{
+						debug('Nulla da ricostruire');
+					}
+				}
 
+				//totale movimenti nel mese
 				$monthTrans = Transaction::find(
 					'all',
 					array(
 						'select' => 'sum(import) as sum_imports',
-						'conditions' => array('account_id = ? AND date >= ? AND date <= ?', 
+						'conditions' => array('account_id = ? AND date >= ? AND date < ? AND auto = ?', 
 							$account->id, 
-							inizioMese($month, $year), 
-							fineMese($month, $year)
+							$datemin, 
+							$datemax,
+							0
 						),
 					)
 				);
+				
 				if ($monthTrans != null){
+					debug('Movimenti mese corrente: '.$monthTrans[0]->sum_imports);
 					$saldo += $monthTrans[0]->sum_imports;
 				}
 
@@ -369,7 +431,7 @@
 					break;
 				}
 				else {
-					conf('Nuova transazione "'.$transaction->description.'" creata correttamente');
+					conf('Chiusura mese corretta, saldo a consuntivo: '.formattaImporto($saldo));
 					unset($_SESSION['temp']['newtransaction']);
 				}	
 				
@@ -453,6 +515,9 @@
 					break;
 				}
 				$newValue['account_id'] = $_SESSION['accountid'];
+				
+				//voce manuale
+				$newValue['auto'] = 0;
 				
 				//estrazione lista tags da parametri
 				$tagstring = $newValue['tags'];
@@ -786,7 +851,7 @@
 		$datemin = date("Y-m-d", mktime(0, 0, 0, $month, 1, $year));
 		$datemax = date("Y-m-d", mktime(0, 0, 0, $month+1, 1, $year));
 		$datetoday = date("Y-m-d");
-		echo "min: $datemin - max: $datemax - today: $datetoday - 1stJan: $date1stJan ";
+		debug("min: $datemin - max: $datemax - today: $datetoday - 1stJan: $date1stJan ");
 
 		//-----------------------------------------------------------------------------------------------------
 
@@ -795,7 +860,12 @@
 			'all',
 			array(
 				'select' => 'sum(import) as sum_imports',
-				'conditions' => array('account_id = ? AND date < ?', $conto->id, $date1stJan),
+				'conditions' => array(
+					'account_id = ? AND date < ? AND auto = ?', 
+					$conto->id, 
+					$date1stJan,
+					0
+				),
 			)
 		);
 		$prevYears = 0;
@@ -812,7 +882,13 @@
 				'all',
 				array(
 					'select' => 'sum(import) as sum_imports',
-					'conditions' => array('account_id = ? AND date >= ? AND date < ?', $conto->id, $beginMonth, $endMonth),
+					'conditions' => array(
+						'account_id = ? AND date >= ? AND date < ? AND auto = ?', 
+						$conto->id, 
+						$beginMonth, 
+						$endMonth,
+						0
+					),
 				)
 			);
 			if ($prevMonth != null){
@@ -834,7 +910,13 @@
 			$transactionsBefore = Transaction::find(
 				'all',
 				array(
-					'conditions' => array('account_id = ? AND date >= ? and date <= ?', $conto->id, $datemin, $datetoday),
+					'conditions' => array(
+						'account_id = ? AND date >= ? AND date <= ? AND auto = ?', 
+						$conto->id, 
+						$datemin, 
+						$datetoday,
+						0
+					),
 					'order' => 'date asc'
 				)
 			);
@@ -843,7 +925,13 @@
 			$transactionsAfter = Transaction::find(
 				'all',
 				array(
-					'conditions' => array('account_id = ? AND date > ? and date < ?', $conto->id, $datetoday, $datemax),
+					'conditions' => array(
+						'account_id = ? AND date > ? AND date < ? AND auto = ?', 
+						$conto->id, 
+						$datetoday, 
+						$datemax,
+						0
+					),
 					'order' => 'date asc'
 				)
 			);
@@ -860,7 +948,13 @@
 			$transactionsAfter = Transaction::find(
 				'all',
 				array(
-					'conditions' => array('account_id = ? AND date >= ? and date < ?', $conto->id, $datemin, $datemax),
+					'conditions' => array(
+						'account_id = ? AND date >= ? and date < ? AND auto = ?', 
+						$conto->id, 
+						$datemin, 
+						$datemax,
+						0
+					),
 					'order' => 'date asc'
 				)
 			);
@@ -967,7 +1061,7 @@
 			'<img src="images/downTriangle.png" onclick="mostraDiv(\'saldiStorici\')"/>'
 		);
 
-		$totale = $prevYears;
+		$totale = $saldoProgressivo;
 		foreach ($transactionsBefore as $transaction){
 			printTransaction($transaction);
 			$totale += $transaction->import;
@@ -985,6 +1079,28 @@
 		
 		// Stampa totale conto attuale
 		printTotal("Saldo previsto a fine mese", $totale, 1);
+		
+		//-----------------------------------------------------------------------------------------------------
+		
+		echo '<hr>';
+
+		// Stampa consuntivi
+		$consuntivi = Transaction::find(
+			'all',
+			array(
+				'conditions' => array(
+					'account_id = ? AND date >= ? AND date < ? AND auto = ?', 
+					$conto->id, 
+					$datemin, 
+					$datemax,
+					1 //chiusura mese
+				),
+				'order' => 'date asc'
+			)
+		);
+		foreach ($consuntivi as $transaction){
+			printTotal("Chiusura", $transaction->import, 2);
+		}
 		
 		echo '</fieldset>';
 

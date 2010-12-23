@@ -248,6 +248,9 @@
 .orangeTot{
 	background-color:orange;
 }
+.blueTot{
+	background-color:lightblue;
+}
 
 .transactionTotValue{
 	position:absolute;

@@ -11,6 +11,9 @@
 	});
 	
 	include_once('include/printfunctions.inc.php');
+	
+	//debug
+	$GLOBALS['debug'] = 1;
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -93,6 +96,13 @@
 	//stampa notice
 	function notice($text){
 		echo '<p class="notice">'.$text.'</p>';
+	}
+	
+	//stampa debug
+	function debug($text){
+		global $debug;
+		if ($debug != 0)
+			echo '<p class="info"><strong>DEBUG:</strong> '.$text.'</p>';
 	}
 	
 ?>
