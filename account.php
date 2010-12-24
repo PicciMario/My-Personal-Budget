@@ -856,21 +856,47 @@
 		//-----------------------------------------------------------------------------------------------------
 
 		// ricerca saldo a inizio anno
-		$prevYearsTransactions = Transaction::find(
-			'all',
+		$prevYears = 0;
+		
+		//recupero dalla chiusura di dicembre MP
+		$dateDicMPmin = date("Y-m-d", mktime(0, 0, 0, 12, 1, $year-1));
+		$dateDicMPmax = date("Y-m-d", mktime(0, 0, 0, 1, 1, $year));
+		$prevYearsTransactions = Transaction::first(
 			array(
-				'select' => 'sum(import) as sum_imports',
-				'conditions' => array(
-					'account_id = ? AND date < ? AND auto = ?', 
+				'conditions' => array('account_id = ? AND date >= ? AND date < ? AND auto = ? AND category_id = ?', 
 					$conto->id, 
-					$date1stJan,
+					$dateDicMPmin,
+					$dateDicMPmax, 
+					1,
 					0
 				),
+				'order' => 'date desc'
 			)
 		);
-		$prevYears = 0;
+		
 		if ($prevYearsTransactions != null){
-			$prevYears = $prevYearsTransactions[0]->sum_imports;
+			$prevYears = $prevYearsTransactions->import;
+			debug('Saldo anno precedente da chiusura dicembre MP ('.$dateDicMPmax.' - '.$dateDicMPmax.'): '.$prevYears);
+		}
+		else{
+			//ricostruisco storico
+			$prevYearsTransactions = Transaction::find(
+				'all',
+				array(
+					'select' => 'sum(import) as sum_imports',
+					'conditions' => array(
+						'account_id = ? AND date < ? AND auto = ?', 
+						$conto->id, 
+						$date1stJan,
+						0
+					),
+				)
+			);
+			if ($prevYearsTransactions != null){
+				$prevYears = $prevYearsTransactions[0]->sum_imports;
+				debug('Saldo anno precedente da ricostruzione (prima di '.$date1stJan.'): '.$prevYears);
+				notice('Anno precedente non chiuso correttamente, ricostruzione saldo');
+			}
 		}
 		
 		//ricerca saldi storici di tutti i mesi dell'anno in corso
