@@ -143,7 +143,25 @@
 				echo '</table></fieldset>';
 				
 				break;
+			
+			case "toggledebug":
+				if (!isset($_SESSION['debug'])){
+					$_SESSION['debug'] = 1;
+					conf('Debug attivato');
+				}
+				else{
+					if ($_SESSION['debug'] == 0) {
+						$_SESSION['debug'] = 1;
+						conf('Debug attivato');
+					}
+					else {
+						$_SESSION['debug'] = 0;
+						conf('Debug disattivato');
+					}
+				}
+				break;
 				
+			
 			// DEFAULT
 			default:
 				err('Errore: passato GET->action = '.$action);

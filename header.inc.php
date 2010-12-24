@@ -13,7 +13,7 @@
 	include_once('include/printfunctions.inc.php');
 	
 	//debug
-	$GLOBALS['debug'] = 1;
+	if (!isset($_SESSION['debug'])) $_SESSION['debug'] = 0;
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -108,11 +108,12 @@
 	
 	//stampa debug
 	function debug($text){
-		global $debug;
-		if ($debug != 0)
+		$debug = $_SESSION['debug'];
+		if ($debug != 0){
 			echo '<p class="info"><strong>DEBUG:</strong> '.$text.'<br>';
 			echo '<font style="font-style:italic;font-size:10px;">click to hide</font>';
 			echo '</p>';
+		}
 	}
 	
 ?>
@@ -163,6 +164,9 @@
 			</script>
 			<?php
 		}
+		
+		$_SESSION['debug'] = 0;
+		
 	}
 
 	// Funzione di logout
@@ -171,6 +175,7 @@
 		unset($_SESSION['userlevel']);
 		unset($_SESSION['username']);
 		unset($_SESSION['accountid']);
+		unset($_SESSION['debug']);
 		
 		?>
 		<script>
@@ -237,9 +242,17 @@
 			}
 			if (admin()){
 			?>
+				<br>
 				<a href="admin.php" class="sbarlink">Admin</a>
 			<?php
+				echo '<a href="admin.php?action=toggledebug" class="sbarlink">';
+					if ($_SESSION['debug'] == 0)
+						echo 'Attiva debug';
+					else
+						echo 'Stop debug';
+				echo '</a>';
 			}
+			
 		?>
 	</div>	
 	

@@ -17,7 +17,7 @@ CREATE TABLE users (
 	updated_at varchar(30)
 );
 
-INSERT INTO users VALUES (1, "mario", "cd827c33216d4e6e46bc60699f3e18a1", 0, "io@me.it", null, null);
+INSERT INTO users VALUES (1, "mario", "cd827c33216d4e6e46bc60699f3e18a1", 1, "io@me.it", null, null);
 INSERT INTO users VALUES (2, "admin", "cd827c33216d4e6e46bc60699f3e18a1", 1, "io@me.it", null, null);
 
 -- **********************************************************************************************************

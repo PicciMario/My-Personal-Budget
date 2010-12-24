@@ -1071,8 +1071,9 @@
 			foreach ($prevMonthsTransactions as $prevMonthsTransaction){
 				$saldoProgressivo += $prevMonthsTransaction['valore'];
 				printTotal('Saldo di '.
+					'<a href="account.php?year='.$prevMonthsTransaction['anno'].'&month='.$prevMonthsTransaction['mese'].'">'.
 					decodificaMese($prevMonthsTransaction['mese']).' '.
-					$prevMonthsTransaction['anno'], $saldoProgressivo);
+					$prevMonthsTransaction['anno'].'</a>', $saldoProgressivo);
 			}
 			
 		echo '</div>';
