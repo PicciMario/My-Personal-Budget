@@ -17,6 +17,9 @@ Tra le features implementate abbiamo:
 <li>Transazioni categorizzate e con la possibilità di inserire un numero arbitrario di tag.
 <li>Vista delle transazioni per mese, con saldo a inizio mese, a fine mese e alla data corrente.
 <li>Vista delle transazioni per categoria.
+<li><font color=red>NEW!! </font>Chiusura contabile di fine mese (semplifica successivi calcoli).
+<li><font color=red>NEW!! </font>Sempre visibili i saldi dei mesi precedenti fino a inizio anno.
+<li><font color=red>NEW!! </font>Funzionalità di debug (gestita da un flag nelle prime righe dell'header.inc.php).
 </ul> 
 
 Numerose altre features sono inoltre in fase di implementazione:
