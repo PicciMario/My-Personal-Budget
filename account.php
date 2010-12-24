@@ -904,6 +904,27 @@
 		for ($i = 1; $i < $month; $i++){
 			$beginMonth = date("Y-m-d", mktime(0, 0, 0, $i, 1, $year));
 			$endMonth = date("Y-m-d", mktime(0, 0, 0, $i+1, 1, $year));
+			
+			$valore = 0;
+			$incremento = 0;
+			
+			$prevMonth = Transaction::first(
+				array(
+					'conditions' => array(
+						'account_id = ? AND date >= ? AND date < ? AND auto = ? AND category_id = ?', 
+						$conto->id, 
+						$beginMonth, 
+						$endMonth,
+						1,
+						0
+					),
+				)
+			);
+			
+			if ($prevMonth != null){
+				$valore = $prevMonth->import;
+			}
+			
 			$prevMonth = Transaction::find(
 				'all',
 				array(
@@ -917,14 +938,18 @@
 					),
 				)
 			);
-			if ($prevMonth != null){
-				$newElement = array(
-					'anno' => $year,
-					'mese' => $i,
-					'valore' => $prevMonth[0]->sum_imports
-				);
-				array_push($prevMonthsTransactions, $newElement);
-			}
+			
+			if ($prevMonth != null) 
+				$incremento = $prevMonth[0]->sum_imports;
+			
+			$newElement = array(
+				'anno' => $year,
+				'mese' => $i,
+				'valore' => $valore,
+				'incremento' => $incremento
+			);
+			array_push($prevMonthsTransactions, $newElement);
+			
 		}
 		
 		
@@ -986,7 +1011,6 @@
 			);
 	
 		}
-
 		
 		//-----------------------------------------------------------------------------------------------------
 		
@@ -1069,11 +1093,18 @@
 			
 			//saldo alla fine di ogni mese precedente al mese selezionato
 			foreach ($prevMonthsTransactions as $prevMonthsTransaction){
-				$saldoProgressivo += $prevMonthsTransaction['valore'];
+				$chiuso = "";
+				if ($prevMonthsTransaction['valore'] != 0){
+					$saldoProgressivo = $prevMonthsTransaction['valore'];
+					$chiuso = " (consuntivato)";
+				}
+				else{
+					$saldoProgressivo += $prevMonthsTransaction['incremento'];
+				}
 				printTotal('Saldo di '.
 					'<a href="account.php?year='.$prevMonthsTransaction['anno'].'&month='.$prevMonthsTransaction['mese'].'">'.
 					decodificaMese($prevMonthsTransaction['mese']).' '.
-					$prevMonthsTransaction['anno'].'</a>', $saldoProgressivo);
+					$prevMonthsTransaction['anno'].'</a>'.$chiuso, $saldoProgressivo);
 			}
 			
 		echo '</div>';
