@@ -930,7 +930,7 @@
 		
 		if ($year == date('Y') && $month == date('m')){
 			
-			echo 'mese corrente';
+			debug('mese corrente');
 		
 			// ricerca transazioni mese corrente (fino al giorno corrente)
 			$transactionsBefore = Transaction::find(
@@ -965,7 +965,7 @@
 		}
 		else{
 			
-			echo 'non mese corrente	';
+			debug('non mese corrente');
 			
 			// annulla transazioni prima
 			$transactionsBefore = array();

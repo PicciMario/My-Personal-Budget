@@ -46,9 +46,11 @@
 			function mostraDiv(divname){
 				$("#"+divname).toggle();
 			}
+			
 			function mostraDivSlow(divname){
 				$("#"+divname).toggle('slow');
 			}
+		    
 		</script>
    		
     </head>
@@ -78,7 +80,9 @@
 	
 	//stampa errore
 	function err($text){
-		echo '<p class="error">'.$text.'</p>';
+		echo '<p class="error"><strong>AVVISO:</strong> '.$text.'<br>';
+		echo '<font style="font-style:italic;font-size:10px;">click to hide</font>';
+		echo '</p>';
 	}
 
 	//stampa errore con pulsante back
@@ -90,19 +94,25 @@
 	
 	//stampa conferma
 	function conf($text){
-		echo '<p class="success">'.$text.'</p>';
+		echo '<p class="success">'.$text.'<br>';
+		echo '<font style="font-style:italic;font-size:10px;">click to hide</font>';
+		echo '</p>';
 	}
 	
 	//stampa notice
 	function notice($text){
-		echo '<p class="notice">'.$text.'</p>';
+		echo '<p class="notice"><strong>AVVISO:</strong> '.$text.'<br>';
+		echo '<font style="font-style:italic;font-size:10px;">click to hide</font>';
+		echo '</p>';
 	}
 	
 	//stampa debug
 	function debug($text){
 		global $debug;
 		if ($debug != 0)
-			echo '<p class="info"><strong>DEBUG:</strong> '.$text.'</p>';
+			echo '<p class="info"><strong>DEBUG:</strong> '.$text.'<br>';
+			echo '<font style="font-style:italic;font-size:10px;">click to hide</font>';
+			echo '</p>';
 	}
 	
 ?>

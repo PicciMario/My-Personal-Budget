@@ -38,6 +38,24 @@
 					primary: "ui-icon-power"
 				}	
    			});
+   			
+   			$("p.info").click(function () {
+		      $(this).hide("slow");
+		      return true;
+		    });
+   			$("p.notice").click(function () {
+		      $(this).hide("slow");
+		      return true;
+		    });
+   			$("p.success").click(function () {
+		      $(this).hide("slow");
+		      return true;
+		    });
+   			$("p.error").click(function () {
+		      $(this).hide("slow");
+		      return true;
+		    });
+
 
 		});
 	</script>
