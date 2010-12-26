@@ -438,6 +438,96 @@
 				$showlist = 1;
 				break;
 				
+			//REOPENMONTH: riapre un mese chiuso a consuntivo
+			case "reopenmonth":
+				if (!isset($_SESSION['userid'])){
+					err("Utente non valido");
+					break;
+				}
+					
+				//individuo utente
+				$user = User::first( 
+					array(
+						'conditions' => array('id = ?', $_SESSION['userid'])
+					)
+				);
+				
+				//se utente non valido interrompo
+				if ($user == null){
+					err('Errore: passato ID di utente inesistente.');
+					break;
+				}
+
+				//lettura conto da variabile sessione
+				if (!isset($_SESSION['accountid'])){
+					err('Nessun conto selezionato');
+					break;
+				}
+				$accountid = $_SESSION['accountid'];
+
+				//individua il conto richiesto
+				$account = Account::first( 
+					array(
+						'conditions' => array('id = ? AND user_id = ?', $accountid, $user->id)
+					)
+				);
+
+				//se conto non valido interrompo
+				if ($account == null){
+					err('Errore: passato ID di conto inesistente.');
+					break;
+				}
+				
+				//verifica presenza e acquisizione parametri da GET
+				$parametri = array(
+					'year',
+					'month'
+				);
+				foreach ($parametri as $parametro){
+					if (!isset($_GET[$parametro])){
+						err('Non sono stati passati tutti i parametri necessari (manca '.$parametro.').');
+						break;
+					}				
+				}			
+				$month = $_GET['month'];
+				$year = $_GET['year'];
+				
+				//calcolo date massima e minima per ricerca
+				$datemin = date("Y-m-d", mktime(0, 0, 0, $month, 1, $year));
+				$datemax = date("Y-m-d", mktime(0, 0, 0, $month+1, 1, $year));
+				debug('Date min: '.$datemin.' - Date max: '.$datemax);
+				
+				//elimino precedenti voci auto=1 nel mese
+				$precChiusure = Transaction::find(
+					'all',
+					array(
+						'conditions' => array('account_id = ? AND date >= ? AND date < ? AND auto = ?', 
+							$account->id, 
+							$datemin, 
+							$datemax,
+							1
+						),
+					)
+				);
+				
+				if (isset($_GET['confirm'])){
+					conf('Riaperto il mese "'.$month.'/'.$year.'"<br>');
+					foreach($precChiusure as $transaction){
+						$transaction->delete();
+					}
+				}
+				else{
+					$mess = 'Procedo a riaprire il mese "'.$month.'/'.$year.'"<br>';
+					$mess .= '<a href="account.php?action=reopenmonth&year='.$year.'&month='.$month.'&confirm"';
+					$mess .= ' class="toolbarButtonDelete">';
+					$mess .= 'clicca per confermare';
+					$mess .= '</a>';
+					notice($mess);						
+				}
+				
+				break;
+
+	
 			default:
 				err("Passato parametro action sconosciuto: ".$_GET['action']);
 				break;
@@ -710,16 +800,7 @@
 				if ($month > 12) $month = 12;
 				if ($month <= 0) $month = 1;
 			}
-		}
-		
-		?>
-		<div class="toolbar">
-			<a href="account.php?action=listaccount" class="toolbarButton">Lista conti</a>
-			<a href="#" onclick="mostraDivSlow('addTransactionForm')" class="toolbarButtonNew" id="addTransaction">Nuova voce</a>
-			<a href="account.php?action=closemonth&year=<?php echo $year;?>&month=<?php echo $month; ?>" class="toolbarButton">Chiudi mese</a>
-		</div>	
-		
-		<?php
+		}			
 		
 		if (!isset($_SESSION['userid'])){
 			err("Utente non valido");
@@ -790,8 +871,45 @@
 			'all',
 			array('conditions' => array('user_id = ?', $user->id))				
 		);		
+
+		// composizione delle date del filtro del mese attuale
+		$date1stJan = date("Y-m-d", mktime(0, 0, 0, 1, 1, $year));
+		$datemin = date("Y-m-d", mktime(0, 0, 0, $month, 1, $year));
+		$datemax = date("Y-m-d", mktime(0, 0, 0, $month+1, 1, $year));
+		$datetoday = date("Y-m-d");
+		debug("min: $datemin - max: $datemax - today: $datetoday - 1stJan: $date1stJan ");
+		
+		//analizzo il mese per vedere se è stato chiuso
+		$cercaChiusura = Transaction::first(
+			array(
+				'conditions' => array(
+					'account_id = ? AND date >= ? AND date < ? AND auto = ?', 
+					$conto->id, 
+					$datemin, 
+					$datemax,
+					1 //chiusura mese
+				),
+				'order' => 'date asc'
+			)
+		);
+		$meseChiuso = 0;
+		if ($cercaChiusura != null)
+			$meseChiuso = 1;
 		
 		?>
+		
+		<div class="toolbar">
+			<a href="account.php?action=listaccount" class="toolbarButton">Lista conti</a>
+			<a href="#" onclick="mostraDivSlow('addTransactionForm')" class="toolbarButtonNew" id="addTransaction">Nuova voce</a>
+			<?php
+			if ($meseChiuso == 0) {
+				echo '<a href="account.php?action=closemonth&year='.$year.'&month='.$month.'" class="toolbarButton">Chiudi mese</a>';
+			}
+			else {
+				echo '<a href="account.php?action=reopenmonth&year='.$year.'&month='.$month.'" class="toolbarButton">Mese chiuso a consuntivo</a>';
+			}
+			?>
+		</div>	
 		
 		<div id="addTransactionForm" style="display:none">
 			<form action="account.php" method="post">
@@ -845,13 +963,6 @@
 		</script>
 
 		<?php
-
-		// composizione delle date del filtro del mese attuale
-		$date1stJan = date("Y-m-d", mktime(0, 0, 0, 1, 1, $year));
-		$datemin = date("Y-m-d", mktime(0, 0, 0, $month, 1, $year));
-		$datemax = date("Y-m-d", mktime(0, 0, 0, $month+1, 1, $year));
-		$datetoday = date("Y-m-d");
-		debug("min: $datemin - max: $datemax - today: $datetoday - 1stJan: $date1stJan ");
 
 		//-----------------------------------------------------------------------------------------------------
 
