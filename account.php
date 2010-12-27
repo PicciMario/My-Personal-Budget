@@ -895,18 +895,26 @@
 		$meseChiuso = 0;
 		if ($cercaChiusura != null)
 			$meseChiuso = 1;
-		
 		?>
 		
 		<div class="toolbar">
 			<a href="account.php?action=listaccount" class="toolbarButton">Lista conti</a>
-			<a href="#" onclick="mostraDivSlow('addTransactionForm')" class="toolbarButtonNew" id="addTransaction">Nuova voce</a>
+			
+			<?php
+			if ($meseChiuso == 0){
+				echo '<a href="#" onclick="mostraDivSlow(\'addTransactionForm\')"'
+					.' class="toolbarButtonNew" id="addTransaction">Nuova voce</a>';
+			}
+			?>
+			
 			<?php
 			if ($meseChiuso == 0) {
-				echo '<a href="account.php?action=closemonth&year='.$year.'&month='.$month.'" class="toolbarButton">Chiudi mese</a>';
+				echo '<a href="account.php?action=closemonth&year='
+					.$year.'&month='.$month.'" class="toolbarButton">Chiudi mese</a>';
 			}
 			else {
-				echo '<a href="account.php?action=reopenmonth&year='.$year.'&month='.$month.'" class="toolbarButton">Mese chiuso a consuntivo</a>';
+				echo '<a href="account.php?action=reopenmonth&year='
+					.$year.'&month='.$month.'" class="toolbarButton">Mese chiuso a consuntivo</a>';
 			}
 			?>
 		</div>	
@@ -1062,7 +1070,6 @@
 			array_push($prevMonthsTransactions, $newElement);
 			
 		}
-		
 		
 		if ($year == date('Y') && $month == date('m')){
 			
