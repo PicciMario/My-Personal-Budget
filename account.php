@@ -494,17 +494,15 @@
 				
 				//calcolo date massima e minima per ricerca
 				$datemin = date("Y-m-d", mktime(0, 0, 0, $month, 1, $year));
-				$datemax = date("Y-m-d", mktime(0, 0, 0, $month+1, 1, $year));
-				debug('Date min: '.$datemin.' - Date max: '.$datemax);
+				debug('Elimino chiusure da: '.$datemin);
 				
 				//elimino precedenti voci auto=1 nel mese
 				$precChiusure = Transaction::find(
 					'all',
 					array(
-						'conditions' => array('account_id = ? AND date >= ? AND date < ? AND auto = ?', 
+						'conditions' => array('account_id = ? AND date >= ? AND auto = ?', 
 							$account->id, 
 							$datemin, 
-							$datemax,
 							1
 						),
 					)
@@ -518,6 +516,7 @@
 				}
 				else{
 					$mess = 'Procedo a riaprire il mese "'.$month.'/'.$year.'"<br>';
+					$mess .= 'Attenzione: la procedura riapre anche tutti i mesi successivi!<br>';
 					$mess .= '<a href="account.php?action=reopenmonth&year='.$year.'&month='.$month.'&confirm"';
 					$mess .= ' class="toolbarButtonDelete">';
 					$mess .= 'clicca per confermare';
@@ -613,6 +612,32 @@
 				$tagstring = $newValue['tags'];
 				unset($newValue['tags']);
 				$taglist = explode(",", $tagstring);
+				
+				//analizzo il mese per vedere se è stato chiuso
+				$dateElems = explode("-",$newValue['date']);
+				$year = $dateElems[2];
+				$month = $dateElems[1];
+				debug("New transaction date: ".$newValue['date']." - Year: $year - Month: $month");
+				$datemin = date("Y-m-d", mktime(0, 0, 0, $month, 1, $year));
+				$datemax = date("Y-m-d", mktime(0, 0, 0, $month+1, 1, $year));				
+				$cercaChiusura = Transaction::first(
+					array(
+						'conditions' => array(
+							'account_id = ? AND date >= ? AND date < ? AND auto = ? and category_id = ?', 
+							$newValue['account_id'], 
+							$datemin, 
+							$datemax,
+							1, 	//chiusura mese
+							0	//no categoria
+						),
+						'order' => 'date asc'
+					)
+				);
+				if ($cercaChiusura != null){
+					debug("Mese chiuso!");
+					notice("Impossibile creare nuova voce: mese chiuso a consuntivo!");
+					break;
+				}
 				
 				//creazione nuovo oggetto e salvataggio
 				$transaction = new Transaction($newValue);
@@ -883,11 +908,12 @@
 		$cercaChiusura = Transaction::first(
 			array(
 				'conditions' => array(
-					'account_id = ? AND date >= ? AND date < ? AND auto = ?', 
+					'account_id = ? AND date >= ? AND date < ? AND auto = ? and category_id = ?', 
 					$conto->id, 
 					$datemin, 
 					$datemax,
-					1 //chiusura mese
+					1, 	//chiusura mese
+					0	//no categoria
 				),
 				'order' => 'date asc'
 			)
@@ -914,7 +940,7 @@
 			}
 			else {
 				echo '<a href="account.php?action=reopenmonth&year='
-					.$year.'&month='.$month.'" class="toolbarButton">Mese chiuso a consuntivo</a>';
+					.$year.'&month='.$month.'" class="toolbarButtonAlert">Mese chiuso a consuntivo</a>';
 			}
 			?>
 		</div>	
@@ -1239,7 +1265,10 @@
 
 		$totale = $saldoProgressivo;
 		foreach ($transactionsBefore as $transaction){
-			printTransaction($transaction);
+			if ($meseChiuso == 0)
+				printTransaction($transaction);
+			else
+				printTransactionNoDelete($transaction);
 			$totale += $transaction->import;
 		}
 	
@@ -1247,7 +1276,10 @@
 			printTotal("Saldo attuale", $totale, 1);	
 
 		foreach ($transactionsAfter as $transaction){
-			printTransaction($transaction);
+			if ($meseChiuso == 0)
+				printTransaction($transaction);
+			else
+				printTransactionNoDelete($transaction);
 			$totale += $transaction->import;
 		}
 		

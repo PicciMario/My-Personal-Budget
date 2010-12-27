@@ -78,44 +78,6 @@
 		return 1;
 	}
 	
-	//stampa errore
-	function err($text){
-		echo '<p class="error"><strong>AVVISO:</strong> '.$text.'<br>';
-		echo '<font style="font-style:italic;font-size:10px;">click to hide</font>';
-		echo '</p>';
-	}
-
-	//stampa errore con pulsante back
-	function errback($text){
-		echo '<p class="error">'.$text;
-		echo '<br><a href="#" onClick="history.go(-1)">Torna indietro</a> ';
-		echo '</p>';
-	}
-	
-	//stampa conferma
-	function conf($text){
-		echo '<p class="success">'.$text.'<br>';
-		echo '<font style="font-style:italic;font-size:10px;">click to hide</font>';
-		echo '</p>';
-	}
-	
-	//stampa notice
-	function notice($text){
-		echo '<p class="notice"><strong>AVVISO:</strong> '.$text.'<br>';
-		echo '<font style="font-style:italic;font-size:10px;">click to hide</font>';
-		echo '</p>';
-	}
-	
-	//stampa debug
-	function debug($text){
-		$debug = $_SESSION['debug'];
-		if ($debug != 0){
-			echo '<p class="info"><strong>DEBUG:</strong> '.$text.'<br>';
-			echo '<font style="font-style:italic;font-size:10px;">click to hide</font>';
-			echo '</p>';
-		}
-	}
-	
 ?>
 
 

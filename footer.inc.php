@@ -31,6 +31,12 @@
 				}
 			});
 			
+			$( ".toolbarButtonAlert" ).button({
+				icons: {
+					primary: "ui-icon-alert"
+				}
+			});
+			
 			$( ".toolbar" ).addClass("ui-widget-header ui-corner-all");
 			
    			$("a#logoutlink").button({

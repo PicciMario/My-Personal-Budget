@@ -29,7 +29,11 @@
 
 	//************************************************************************************************
 
-	function printTransaction($transaction, $descr = 0){
+	function printTransactionNoDelete($transaction, $descr = 0){
+		printTransaction($transaction, $descr, 1);
+	}
+
+	function printTransaction($transaction, $descr = 0, $noDelete = 0){
 		
 		//$descr indica cosa stampare nel secondo campo descrizione
 		//0 = nome categoria di appartenenza
@@ -90,9 +94,11 @@
 		
 			//toolbar note transazione
 			echo '<div class="simpleToolbar">';
-			echo '<a href="account.php?action=deletetransaction&transactionid='.$transaction->id.'"';
-			echo ' class=toolbarButtonDelete>';
-			echo 'Cancella</a>';
+			if ($noDelete == 0){
+				echo '<a href="account.php?action=deletetransaction&transactionid='.$transaction->id.'"';
+				echo ' class=toolbarButtonDelete>';
+				echo 'Cancella</a>';
+			}
 			echo '</div>';
 			
 			//testo note alla transazione
@@ -221,6 +227,46 @@
 	}
 	function fineMese($month, $year){
 		return date("Y-m-d", mktime(0, 0, 0, $month+1, 0, $year));
+	}
+	
+	//************************************************************************************************
+
+	//stampa errore
+	function err($text){
+		echo '<p class="error"><strong>AVVISO:</strong> '.$text.'<br>';
+		echo '<font style="font-style:italic;font-size:10px;">click to hide</font>';
+		echo '</p>';
+	}
+
+	//stampa errore con pulsante back
+	function errback($text){
+		echo '<p class="error">'.$text;
+		echo '<br><a href="#" onClick="history.go(-1)">Torna indietro</a> ';
+		echo '</p>';
+	}
+	
+	//stampa conferma
+	function conf($text){
+		echo '<p class="success">'.$text.'<br>';
+		echo '<font style="font-style:italic;font-size:10px;">click to hide</font>';
+		echo '</p>';
+	}
+	
+	//stampa notice
+	function notice($text){
+		echo '<p class="notice"><strong>AVVISO:</strong> '.$text.'<br>';
+		echo '<font style="font-style:italic;font-size:10px;">click to hide</font>';
+		echo '</p>';
+	}
+	
+	//stampa debug
+	function debug($text){
+		$debug = $_SESSION['debug'];
+		if ($debug != 0){
+			echo '<p class="info"><strong>DEBUG:</strong> '.$text.'<br>';
+			echo '<font style="font-style:italic;font-size:10px;">click to hide</font>';
+			echo '</p>';
+		}
 	}
 
 ?>
