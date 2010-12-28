@@ -525,7 +525,6 @@
 				}
 				
 				break;
-
 	
 			default:
 				err("Passato parametro action sconosciuto: ".$_GET['action']);
@@ -573,6 +572,7 @@
 					'description',
 					'import',
 					'category_id',
+					'second_account_id',
 					'date',
 					'note',
 					'tags'
@@ -613,8 +613,16 @@
 				unset($newValue['tags']);
 				$taglist = explode(",", $tagstring);
 				
+				//estrazione secondo conto da parametri
+				$second_account_id = $newValue['second_account_id'];
+				unset($newValue['second_account_id']);
+				
 				//analizzo il mese per vedere se è stato chiuso
 				$dateElems = explode("-",$newValue['date']);
+				if (!isset($dateElems[1]) || !isset($dateElems[2])){
+					err('Errore nel calcolo della data.');
+					break;
+				}
 				$year = $dateElems[2];
 				$month = $dateElems[1];
 				debug("New transaction date: ".$newValue['date']." - Year: $year - Month: $month");
@@ -634,11 +642,27 @@
 					)
 				);
 				if ($cercaChiusura != null){
-					debug("Mese chiuso!");
 					notice("Impossibile creare nuova voce: mese chiuso a consuntivo!");
 					break;
 				}
-				
+				$cercaChiusura2 = Transaction::first(
+					array(
+						'conditions' => array(
+							'account_id = ? AND date >= ? AND date < ? AND auto = ? and category_id = ?', 
+							$second_account_id, 
+							$datemin, 
+							$datemax,
+							1, 	//chiusura mese
+							0	//no categoria
+						),
+						'order' => 'date asc'
+					)
+				);
+				if ($cercaChiusura2 != null){
+					notice("Impossibile creare nuova voce: mese chiuso a consuntivo per il conto complementare!");
+					break;
+				}
+
 				//creazione nuovo oggetto e salvataggio
 				$transaction = new Transaction($newValue);
 				$result = $transaction->save();
@@ -660,8 +684,116 @@
 				//recupero la transizione (per import e description)
 				$transaction = Transaction::last(
 					array(
-						'conditions' => array('import = ? AND description = ?', 
-							$newValue['import'], $newValue['description'])
+						'conditions' => array(
+							'import = ? AND description = ?', 
+							$newValue['import'], 
+							$newValue['description'])
+					)
+				);
+				
+				//salva la lista tags
+				foreach ($taglist as $tagname){
+					$tagname = trim($tagname);
+					if (strlen($tagname) == 0) continue;
+					
+					//verifico se il tag esiste già per l'utente
+					$tag = Tag::first(
+						array(
+							'conditions' => 
+								array('user_id = ? AND name = ?', $user->id, $tagname)
+						)
+					);
+					
+					//se non esiste lo creo
+					if ($tag == null){
+						$tag = new Tag( 
+							array(
+								'name' => $tagname,
+								'user_id' => $user->id
+							)
+						);
+						$result = $tag->save();
+						
+						//gestione errori nella creazione nuovo tag
+						if ($result == false){
+							$errors = '<ul class="error" style="padding:10px 10px 10px 20px;">';
+							$errors .= '<li>Impossibile creare il tag: '.$tag->name;
+							foreach ($tag->errors as $msg)
+								$errors .= '<li>-- '.$msg;
+							$errors .= '</ul>';
+							echo $errors;
+							break;
+						}
+						
+						//recupero il tag salvato
+						$tag = Tag::first(
+							array(
+								'conditions' => 
+									array('user_id = ? AND name = ?', $user->id, $tagname)
+							)
+						);
+						
+						if ($tag == null) {
+							err('Errore nella creazione di un nuovo tag');
+							break;
+						}
+					
+					}
+					
+					//associo il tag alla transazione
+					$transactiontag = new Transactiontag(
+						array(
+							'transaction_id' => $transaction->id,
+							'tag_id' => $tag->id
+						)
+					);
+					$result = $transactiontag->save();
+					
+					//gestione errori
+					if ($result == false){
+						$errors = '<ul class="error" style="padding:10px 10px 10px 20px;">';
+						$errors .= '<li>Impossibile associare il tag: '.$tag->name;
+						foreach ($transactiontag->errors as $msg)
+							$errors .= '<li>-- '.$msg;
+						$errors .= '</ul>';
+						echo $errors;
+						break;
+					}
+				
+				}
+				
+				////////////////////////////////////////////////////////////////////
+					
+				//creazione nuovo oggetto (conto opposto) e salvataggio
+				
+				if ($second_account_id == 0) break;
+				
+				$newValue['account_id'] = $second_account_id;
+				$newValue['import'] = -$newValue['import'];
+				$transaction = new Transaction($newValue);
+				$result = $transaction->save();
+				
+				//verifica salvataggio
+				if ($result == false){
+					$errors = '<ul class="error" style="padding:10px 10px 10px 20px;">';
+					foreach ($transaction->errors as $msg)
+						$errors .= '<li>'.$msg;
+					$errors .= '</ul>';
+					echo $errors;
+					break;
+				}
+				else {
+					conf('Transazione opposta creata correttamente.');
+					unset($_SESSION['temp']['newtransaction']);
+				}
+				
+				//recupero la transizione (per import e description)
+				$transaction = Transaction::last(
+					array(
+						'conditions' => array(
+							'import = ? AND description = ?', 
+							$newValue['import'], 
+							$newValue['description'])
 					)
 				);
 				
@@ -732,6 +864,7 @@
 						echo $errors;
 						break;
 					}
+
 					
 				}			
 				
@@ -895,8 +1028,19 @@
 		$categories = Category::find(
 			'all',
 			array('conditions' => array('user_id = ?', $user->id))				
-		);		
+		);	
 
+		//recupero elenco account per l'utente				
+		$useraccounts = Account::find(
+			'all',
+			array(
+				'conditions' => array(
+					'user_id = ?', 
+					$user->id
+				)
+			)				
+		);		
+	
 		// composizione delle date del filtro del mese attuale
 		$date1stJan = date("Y-m-d", mktime(0, 0, 0, 1, 1, $year));
 		$datemin = date("Y-m-d", mktime(0, 0, 0, $month, 1, $year));
@@ -959,6 +1103,17 @@
 					foreach($categories as $category){
 						echo '<option value="'.$category->id.'">'.$category->name.'</option>';
 						echo $category->name;
+					}
+					?>
+				</select><br>
+				
+				Eventuale voce complementare:<br>
+				<select name="second_account_id">
+					<option value="0" selected>----</option>
+					<?php
+					foreach($useraccounts as $useraccount){
+						if ($useraccount->id != $_SESSION['accountid'])
+							echo '<option value="'.$useraccount->id.'">'.$useraccount->description.'</option>';
 					}
 					?>
 				</select><br>
