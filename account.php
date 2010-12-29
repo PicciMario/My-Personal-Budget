@@ -242,7 +242,32 @@
 					err("la voce non appartiene all'utente loggato.");
 					break;
 				}
-
+				
+				//analizzo il mese per vedere se è stato chiuso
+				$year = $transaction->date->format('Y');
+				$month = $transaction->date->format('m');
+				debug("New transaction date - Year: $year - Month: $month");
+				$datemin = date("Y-m-d", mktime(0, 0, 0, $month, 1, $year));
+				$datemax = date("Y-m-d", mktime(0, 0, 0, $month+1, 1, $year));				
+				$cercaChiusura = Transaction::first(
+					array(
+						'conditions' => array(
+							'account_id = ? AND date >= ? AND date < ? AND auto = ? and category_id = ?', 
+							$account->id, 
+							$datemin, 
+							$datemax,
+							1, 	//chiusura mese
+							0	//no categoria
+						),
+						'order' => 'date asc'
+					)
+				);
+				if ($cercaChiusura != null){
+					notice("Impossibile eliminare nuova voce: mese chiuso a consuntivo!");
+					break;
+				}
+				
+				//procedo alla cancellazione
 				if (isset($_GET['confirm'])){
 					
 					//elimina collegamenti con tags
