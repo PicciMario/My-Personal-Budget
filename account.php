@@ -1435,15 +1435,17 @@
 		
 		//-----------------------------------------------------------------------------------------------------
 		
+		$saldoInizioMese = $saldoProgressivo;
+		
 		// Stampa storico
 		printTotal(
 			'Saldo inizio mese', 
-			$saldoProgressivo,
+			$saldoInizioMese,
 			1,
 			'<img src="images/downTriangle.png" onclick="mostraDiv(\'saldiStorici\')"/>'
 		);
 
-		$totale = $saldoProgressivo;
+		$totale = $saldoInizioMese;
 		foreach ($transactionsBefore as $transaction){
 			if ($meseChiuso == 0)
 				printTransaction($transaction);
@@ -1473,21 +1475,22 @@
 		echo '<hr>';
 
 		// Stampa consuntivi
-		$consuntivi = Transaction::find(
-			'all',
+		$consuntivo = Transaction::first(
 			array(
 				'conditions' => array(
-					'account_id = ? AND date >= ? AND date < ? AND auto = ?', 
+					'account_id = ? AND date >= ? AND date < ? AND auto = ? and category_id = ?', 
 					$conto->id, 
 					$datemin, 
 					$datemax,
-					1 //chiusura mese
+					1, //chiusure mese
+					0 //no categoria
 				),
-				'order' => 'date asc'
+				'order' => 'auto asc'
 			)
 		);
-		foreach ($consuntivi as $transaction){
-			printTotal("Chiusura", $transaction->import, 2);
+		if ($consuntivo != null){
+			printTotal("Chiusura mese", $consuntivo->import, 2);
+			printTotal("Variazione saldo mensile", ($consuntivo->import - $saldoInizioMese), 2);
 		}
 		
 		echo '</fieldset>';
