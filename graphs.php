@@ -94,7 +94,8 @@
 			<?php
 			
 			//elenco conti per l'utente
-			$account = Account::first(
+			$accounts = Account::find(
+				'all',
 				array(
 					'conditions' => array(
 						'user_id = ?', $_SESSION['userid']
@@ -103,49 +104,72 @@
 			);
 			
 			//saldi 2010
-			$saldi = Transaction::find(
-				'all',
-				array(
-					'conditions' => array(
-						'account_id = ? AND auto = ? AND category_id = ?',
-						$account->id,
-						1,
-						0						
-					),
-					'order' => 'date asc'
-				)
-			);
+			$year = 2010;
+			$beginYear = date("Y-m-d", mktime(0, 0, 0, 1, 1, $year));
+			$endYear = date("Y-m-d", mktime(0, 0, 0, 1, 1, $year+1));
 			
-			echo '<fieldset><legend>'.$account->description.' - saldi a consuntivo</legend>';
+			$saldi = array();
+			$nomi = array();
+			for($i = 0; $i < count($accounts); $i++){
+				$account = $accounts[$i];
+				$nomi[$i] = $account->description;
+				$saldi[$i] = array();
+				$saldi[$i] = Transaction::find(
+					'all',
+					array(
+						'conditions' => array(
+							'account_id = ? AND auto = ? AND category_id = ? and date >= ? AND date < ?',
+							$account->id,
+							1,
+							0,
+							$beginYear, 
+							$endYear				
+						),
+						'order' => 'date asc'
+					)
+				);
+			}
 			
-			print "Numero elementi: ".count($saldi)."<br>";
+			echo '<fieldset><legend>Saldi mensili</legend>';
 			
 			?>
+			
 				<script language="javascript" type="text/javascript" src="flot/jquery.flot.min.js"></script>
 				<!--[if IE]><script language="javascript" type="text/javascript" src="flot/excanvas.min.js"></script><![endif]-->
-				<div id="placeholder" style="width:600px;height:300px"></div>
+				<div id="legenda" style="width:400px;margin-left:10px;margin-right:10px;"></div>
+				<div id="placeholder" style="width:600px;height:300px;"></div>
 
 				<script>				
 				$(function () {
-				    var d1 = [];
-				    
-				<?php 
-					foreach ($saldi as $saldo) {
-						echo 'd1.push(['.$saldo->date->format("m").','.$saldo->import.']);';
-					}
-				?>     
-				             
+				    				    
+					<?php 
+						for($i = 0; $i < count($saldi); $i++){
+							echo 'var d'.$i.' = [];';
+							$elementi = $saldi[$i];
+							foreach ($elementi as $elemento) {
+								echo 'd'.$i.'.push(['.$elemento->date->format("m").','.$elemento->import.']);';
+							}
+						}
+					?>    
+				
 				    $.plot($("#placeholder"), [
-				        {
-				            data: d1,
-				            lines: { show: true },
-				            points: { show: true}
-				        }
+				    
+				    <?php
+						for($i = 0; $i < count($saldi); $i++){
+							echo '{';
+							echo 'data: d'.$i.',';
+							echo 'label: "'.$nomi[$i].'",';
+							echo 'lines: { show: true },';
+							echo 'points: { show: true}';
+							echo '},';
+						}				    
+				    ?>
+
 				    ],{
 						xaxis: {
 	            			ticks: [
-	            				[1, "GEN"],
-	            				[2, "FEB"],
+								[1, "GEN"],
+								[2, "FEB"],
 	            				[3, "MAR"],
 	            				[4, "APR"],
 	            				[5, "MAG"],
@@ -155,17 +179,22 @@
 	            				[9, "SET"], 
 	           					[10, "OTT"],
 	           					[11, "NOV"],
-	           					[12, "DIC"], 
-	           				]
+								[12, "DIC"], 
+							]
         				},
         				grid: {
             				backgroundColor: { colors: ["#fff", "#eee"] }
-       		 			}
+       		 			},
+						legend: {
+							container: legenda
+						}			
+       		 
 				    });
 				});
 				</script>
+				
 			<?php
-			
+
 			echo '</fieldset>';
 		
 			break;
