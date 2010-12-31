@@ -56,7 +56,7 @@
 					)				
 				);
 				
-				//saldi 2010
+				//saldi anno corrente (o anno passato da get)
 				$year = date("Y");
 				if (isset($_GET['year'])){
 					if (is_numeric($_GET['year'])){
@@ -64,8 +64,16 @@
 					}
 				}
 				
+				//calcolo date inizio e fine anno
 				$beginYear = date("Y-m-d", mktime(0, 0, 0, 1, 1, $year));
 				$endYear = date("Y-m-d", mktime(0, 0, 0, 1, 1, $year+1));
+				
+				//costruzione di array 2-dimensionale
+				//array ---> account ---> chiusura
+				//      |             |-> chiusura
+				//      |
+				//      |--> account ---> chiusura
+				//                    |-> chiusura
 				
 				$saldi = array();
 				$nomi = array();
@@ -92,76 +100,123 @@
 				echo '<fieldset><legend>Saldi mensili '.$year.'</legend>';
 				
 				?>
-								
-					<div id="legenda" style="width:400px;margin-left:10px;margin-right:10px;"></div>
-					<div id="placeholder" style="width:600px;height:300px;"></div>
+				<!-- spazio per costruzione legenda grafico -->
+				<div id="legenda" style="width:400px;margin-left:10px;margin-right:10px;"></div>
+				
+				<!-- spazio per costruzione canvas grafico -->
+				<div id="placeholder" style="width:600px;height:300px;"></div>
 
-					<hr>
+				<hr>
 
-					<div align=center>
-					<div>
-						<a href="graphs.php?action=mostrasaldi&year=<?php echo $year-1 ?>" class="toolbarButtonLeftText" id="addCategory"><?php echo $year-1 ?></a>
-						<a href="graphs.php?action=mostrasaldi&year=<?php echo date("Y") ?>" class="toolbarButton" id="addCategory">Anno corrente <?php echo date("Y") ?></a>
-						<a href="graphs.php?action=mostrasaldi&year=<?php echo $year+1 ?>" class="toolbarButtonRightText" id="addCategory"><?php echo $year+1 ?></a>
-					</div>
-					</div>
-	
-					<script>				
-					$(function () {
-					    				    
-						<?php 
-							//crea le variabili con i dati
-							for($i = 0; $i < count($saldi); $i++){
-								echo 'var d'.$i.' = [];';
-								$elementi = $saldi[$i];
-								foreach ($elementi as $elemento) {
-									echo 'd'.$i.'.push(['.$elemento->date->format("m").','.$elemento->import.']);';
-								}
+				<!-- Barra di cambio anno -->
+				<div align=center>
+				<div>
+					<a href="graphs.php?action=mostrasaldi&year=<?php echo $year-1 ?>" class="toolbarButtonLeftText" id="addCategory"><?php echo $year-1 ?></a>
+					<a href="graphs.php?action=mostrasaldi&year=<?php echo date("Y") ?>" class="toolbarButton" id="addCategory">Anno corrente <?php echo date("Y") ?></a>
+					<a href="graphs.php?action=mostrasaldi&year=<?php echo $year+1 ?>" class="toolbarButtonRightText" id="addCategory"><?php echo $year+1 ?></a>
+				</div>
+				</div>
+
+				<script>				
+				$(function () {
+				    				    
+					<?php 
+						//crea le variabili con i dati
+						for($i = 0; $i < count($saldi); $i++){
+							echo 'var d'.$i.' = [];';
+							$elementi = $saldi[$i];
+							foreach ($elementi as $elemento) {
+								echo 'd'.$i.'.push(['.$elemento->date->format("m").','.$elemento->import.']);';
 							}
-						?>    
+						}
+					?>    
+				
+				    $.plot($("#placeholder"), [
+				    
+				    <?php
+				    	//inizializza le serie
+						for($i = 0; $i < count($saldi); $i++){
+							echo '{';
+							echo 'data: d'.$i.',';
+							echo 'label: "'.$nomi[$i].'",';
+							echo 'lines: { show: true },';
+							echo 'points: { show: true}';
+							echo '},';
+						}				    
+				    ?>
+
+				    ],{
+						xaxis: {
+	            			ticks: [
+								[1, "GEN"],
+								[2, "FEB"],
+	            				[3, "MAR"],
+	            				[4, "APR"],
+	            				[5, "MAG"],
+	            				[6, "GIU"],
+	            				[7, "LUG"],
+	            				[8, "AGO"],
+	            				[9, "SET"], 
+	           					[10, "OTT"],
+	           					[11, "NOV"],
+								[12, "DIC"], 
+							]
+        				},
+        				grid: {
+            				backgroundColor: { 
+           						colors: ["#fff", "#eee"] 
+           					}
+       		 			},
+						legend: {
+							container: legenda
+						},	
+						grid: { 
+							hoverable: true, 
+							clickable: true 
+						}		
+       		 
+				    });
+				});	
+
+			    function showTooltip(x, y, contents) {
+			        $('<div id="tooltip">' + contents + '</div>').css( {
+			            position: 'absolute',
+			            display: 'none',
+			            top: y + 5,
+			            left: x + 5,
+			            border: '1px solid #fdd',
+			            padding: '2px',
+			            'background-color': '#fee',
+			            opacity: 0.80
+			        }).appendTo("body").fadeIn(200);
+			    }
+			
+							
+			    var previousPoint = null;
+			    $("#placeholder").bind("plothover", function (event, pos, item) {
+			        $("#x").text(pos.x.toFixed(2));
+			        $("#y").text(pos.y.toFixed(2));
+			        
+					if (item) {
+					    if (previousPoint != item.datapoint) {
+					        previousPoint = item.datapoint;
+					        
+					        $("#tooltip").remove();
+					        var x = item.datapoint[0].toFixed(0),
+					            y = item.datapoint[1].toFixed(2);
+					        
+					        showTooltip(item.pageX, item.pageY,
+					                    item.series.label + " (mese " + x + "): " + y);
+					    }
+					}
+					else {
+					    $("#tooltip").remove();
+					    previousPoint = null;            
+					}
 					
-					    $.plot($("#placeholder"), [
-					    
-					    <?php
-					    	//inizializza le serie
-							for($i = 0; $i < count($saldi); $i++){
-								echo '{';
-								echo 'data: d'.$i.',';
-								echo 'label: "'.$nomi[$i].'",';
-								echo 'lines: { show: true },';
-								echo 'points: { show: true}';
-								echo '},';
-							}				    
-					    ?>
-	
-					    ],{
-							xaxis: {
-		            			ticks: [
-									[1, "GEN"],
-									[2, "FEB"],
-		            				[3, "MAR"],
-		            				[4, "APR"],
-		            				[5, "MAG"],
-		            				[6, "GIU"],
-		            				[7, "LUG"],
-		            				[8, "AGO"],
-		            				[9, "SET"], 
-		           					[10, "OTT"],
-		           					[11, "NOV"],
-									[12, "DIC"], 
-								]
-	        				},
-	        				grid: {
-	            				backgroundColor: { colors: ["#fff", "#eee"] }
-	       		 			},
-							legend: {
-								container: legenda
-							}			
-	       		 
-					    });
-					});
-					</script>
-					
+			    });
+			    </script>			
+						
 				<?php
 	
 				echo '</fieldset>';
