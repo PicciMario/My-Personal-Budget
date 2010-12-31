@@ -12,10 +12,22 @@
 				}
 			});
 			
+			$( ".toolbarButtonLeftText" ).button({
+				icons: {
+					primary: "ui-icon-seek-prev"
+				}
+			});
+			
 			$( ".toolbarButtonRight" ).button({
 				text:false,
 				icons: {
 					primary: "ui-icon-seek-next"
+				}
+			});
+			
+			$( ".toolbarButtonRightText" ).button({
+				icons: {
+					secondary: "ui-icon-seek-next"
 				}
 			});
 			

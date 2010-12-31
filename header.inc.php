@@ -200,6 +200,7 @@
 				<a href="account.php?action=listaccount" class="sbarlink">Conti</a>
 				<a href="account.php" class="sbarlink">Movimenti</a>
 				<a href="categories.php" class="sbarlink">Categorie</a>
+				<a href="graphs.php" class="sbarlink">Grafici</a>
 			<?php
 			}
 			if (admin()){
