@@ -47,14 +47,33 @@
 				}
 				
 				//elenco conti per l'utente
-				$accounts = Account::find(
+				$userAccounts = Account::find(
 					'all',
 					array(
 						'conditions' => array(
-							'user_id = ?', $_SESSION['userid']
+							'user_id = ?', 
+							$_SESSION['userid']
 						)
 					)				
-				);
+				);			
+				if (isset($_GET['accountid'])){
+					if ($_GET['accountid'] == 0) unset($_GET['accountid']);
+				}
+				if (isset($_GET['accountid'])){
+					$accounts = Account::find(
+						'all',
+						array(
+							'conditions' => array(
+								'user_id = ? AND id = ?', 
+								$_SESSION['userid'],
+								$_GET['accountid']
+							)
+						)				
+					);					
+				} 
+				else{
+					$accounts = $userAccounts;
+				}
 				
 				//saldi anno corrente (o anno passato da get)
 				$year = date("Y");
@@ -100,122 +119,186 @@
 				echo '<fieldset><legend>Saldi mensili '.$year.'</legend>';
 				
 				?>
-				<!-- spazio per costruzione legenda grafico -->
-				<div id="legenda" style="width:400px;margin-left:10px;margin-right:10px;"></div>
 				
-				<!-- spazio per costruzione canvas grafico -->
-				<div id="placeholder" style="width:600px;height:300px;"></div>
+					<!-- Barra di cambio anno -->
+					<div align=center>
+					<div>
+						<a href="graphs.php?action=mostrasaldi&year=<?php echo $year-1 ?>" class="toolbarButtonLeftText" id="addCategory"><?php echo $year-1 ?></a>
+						<a href="graphs.php?action=mostrasaldi&year=<?php echo date("Y") ?>" class="toolbarButton" id="addCategory">Oggi: <?php echo date("Y") ?></a>
+						
+						<span id="scegliConto">
+						<button id="scegliContoNome">
+							<?php
+								if (count($saldi) > 1){
+									echo "Tutti i conti";
+								}
+								else if (count($saldi == 1)){
+									if (isset($nomi[0]))
+										echo $nomi[0];
+									else
+										echo "Nessun conto selezionato";
+								}
 
-				<hr>
-
-				<!-- Barra di cambio anno -->
-				<div align=center>
-				<div>
-					<a href="graphs.php?action=mostrasaldi&year=<?php echo $year-1 ?>" class="toolbarButtonLeftText" id="addCategory"><?php echo $year-1 ?></a>
-					<a href="graphs.php?action=mostrasaldi&year=<?php echo date("Y") ?>" class="toolbarButton" id="addCategory">Anno corrente <?php echo date("Y") ?></a>
-					<a href="graphs.php?action=mostrasaldi&year=<?php echo $year+1 ?>" class="toolbarButtonRightText" id="addCategory"><?php echo $year+1 ?></a>
-				</div>
-				</div>
-
-				<script>				
-				$(function () {
-				    				    
-					<?php 
-						//crea le variabili con i dati
-						for($i = 0; $i < count($saldi); $i++){
-							echo 'var d'.$i.' = [];';
-							$elementi = $saldi[$i];
-							foreach ($elementi as $elemento) {
-								echo 'd'.$i.'.push(['.$elemento->date->format("m").','.$elemento->import.']);';
-							}
-						}
-					?>    
-				
-				    $.plot($("#placeholder"), [
-				    
-				    <?php
-				    	//inizializza le serie
-						for($i = 0; $i < count($saldi); $i++){
-							echo '{';
-							echo 'data: d'.$i.',';
-							echo 'label: "'.$nomi[$i].'",';
-							echo 'lines: { show: true },';
-							echo 'points: { show: true}';
-							echo '},';
-						}				    
-				    ?>
-
-				    ],{
-						xaxis: {
-	            			ticks: [
-								[1, "GEN"],
-								[2, "FEB"],
-	            				[3, "MAR"],
-	            				[4, "APR"],
-	            				[5, "MAG"],
-	            				[6, "GIU"],
-	            				[7, "LUG"],
-	            				[8, "AGO"],
-	            				[9, "SET"], 
-	           					[10, "OTT"],
-	           					[11, "NOV"],
-								[12, "DIC"], 
-							]
-        				},
-        				grid: {
-            				backgroundColor: { 
-           						colors: ["#fff", "#eee"] 
-           					}
-       		 			},
-						legend: {
-							container: legenda
-						},	
-						grid: { 
-							hoverable: true, 
-							clickable: true 
-						}		
-       		 
-				    });
-				});	
-
-			    function showTooltip(x, y, contents) {
-			        $('<div id="tooltip">' + contents + '</div>').css( {
-			            position: 'absolute',
-			            display: 'none',
-			            top: y + 5,
-			            left: x + 5,
-			            border: '1px solid #fdd',
-			            padding: '2px',
-			            'background-color': '#fee',
-			            opacity: 0.80
-			        }).appendTo("body").fadeIn(200);
-			    }
-			
-							
-			    var previousPoint = null;
-			    $("#placeholder").bind("plothover", function (event, pos, item) {
-			        $("#x").text(pos.x.toFixed(2));
-			        $("#y").text(pos.y.toFixed(2));
-			        
-					if (item) {
-					    if (previousPoint != item.datapoint) {
-					        previousPoint = item.datapoint;
-					        
-					        $("#tooltip").remove();
-					        var x = item.datapoint[0].toFixed(0),
-					            y = item.datapoint[1].toFixed(2);
-					        
-					        showTooltip(item.pageX, item.pageY,
-					                    item.series.label + " (mese " + x + "): " + y);
-					    }
-					}
-					else {
-					    $("#tooltip").remove();
-					    previousPoint = null;            
-					}
+							?>
+						</button>
+						<button id="select">Scegli un conto</button>
+						</span>
+						
+						<a href="graphs.php?action=mostrasaldi&year=<?php echo $year+1 ?>" class="toolbarButtonRightText" id="addCategory"><?php echo $year+1 ?></a>
+						
+					</div>
+					</div>
 					
-			    });
-			    </script>			
+					<!-- form per scelta conto -->
+					<div id="scegliContoForm" style="display:none;">
+						<form action="graphs.php" method="get">
+							
+							Conto da mostrare:
+							<select name="accountid">
+								<?php
+								echo '<option value=0>Tutti i conti</option>';
+								foreach($userAccounts as $account){
+									echo '<option value="'.$account->id.'">'.$account->description.'</option>';
+									echo $account->description;
+								}
+								?>
+							</select>
+							
+							<input type=hidden name="action" value="mostrasaldi">
+							<input type=submit value="Mostra">
+						</form>
+					</div>
+		
+					<br>
+					<hr>
+
+					<!-- spazio per costruzione legenda grafico -->
+					<div id="legenda" style="width:400px;margin-left:10px;margin-right:10px;"></div>
+					
+					<!-- spazio per costruzione canvas grafico -->
+					<div id="placeholder" style="width:600px;height:300px;"></div>
+
+					<hr>
+					
+					<!-- javascript per il pulsante di selezione conto -->
+					<script>
+					$(function() {
+						$( "#scegliContoNome" )
+							.button()
+							.next()
+								.button( {
+									text: false,
+									icons: {
+										primary: "ui-icon-triangle-1-s"
+									}
+								})
+								.click(function() {
+									mostraDiv('scegliContoForm');
+								})
+								
+								$("#scegliConto").buttonset();
+					});
+					</script>
+	
+					<script>				
+					$(function () {
+					    				    
+						<?php 
+							//crea le variabili con i dati
+							for($i = 0; $i < count($saldi); $i++){
+								echo 'var d'.$i.' = [];';
+								$elementi = $saldi[$i];
+								foreach ($elementi as $elemento) {
+									echo 'd'.$i.'.push(['.$elemento->date->format("m").','.$elemento->import.']);';
+								}
+							}
+						?>    
+					
+					    $.plot($("#placeholder"), [
+					    
+					    <?php
+					    	//inizializza le serie
+							for($i = 0; $i < count($saldi); $i++){
+								echo '{';
+								echo 'data: d'.$i.',';
+								echo 'label: "'.$nomi[$i].'",';
+								echo 'lines: { show: true },';
+								echo 'points: { show: true}';
+								echo '},';
+							}				    
+					    ?>
+	
+					    ],{
+							xaxis: {
+		            			ticks: [
+									[1, "GEN"],
+									[2, "FEB"],
+		            				[3, "MAR"],
+		            				[4, "APR"],
+		            				[5, "MAG"],
+		            				[6, "GIU"],
+		            				[7, "LUG"],
+		            				[8, "AGO"],
+		            				[9, "SET"], 
+		           					[10, "OTT"],
+		           					[11, "NOV"],
+									[12, "DIC"], 
+								]
+	        				},
+	        				grid: {
+	            				backgroundColor: { 
+            						colors: ["#fff", "#eee"] 
+            					}
+	       		 			},
+							legend: {
+								container: legenda
+							},	
+							grid: { 
+								hoverable: true, 
+								clickable: true 
+							}		
+	       		 
+					    });
+					});	
+	
+				    function showTooltip(x, y, contents) {
+				        $('<div id="tooltip">' + contents + '</div>').css( {
+				            position: 'absolute',
+				            display: 'none',
+				            top: y + 5,
+				            left: x + 5,
+				            border: '1px solid #fdd',
+				            padding: '2px',
+				            'background-color': '#fee',
+				            opacity: 0.80
+				        }).appendTo("body").fadeIn(200);
+				    }
+				
+								
+				    var previousPoint = null;
+				    $("#placeholder").bind("plothover", function (event, pos, item) {
+				        $("#x").text(pos.x.toFixed(2));
+				        $("#y").text(pos.y.toFixed(2));
+				        
+						if (item) {
+						    if (previousPoint != item.datapoint) {
+						        previousPoint = item.datapoint;
+						        
+						        $("#tooltip").remove();
+						        var x = item.datapoint[0].toFixed(0),
+						            y = item.datapoint[1].toFixed(2);
+						        
+						        showTooltip(item.pageX, item.pageY,
+						                    item.series.label + " (mese " + x + "): " + y);
+						    }
+						}
+						else {
+						    $("#tooltip").remove();
+						    previousPoint = null;            
+						}
+						
+				    });
+				    </script>			
 						
 				<?php
 	
