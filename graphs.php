@@ -69,26 +69,7 @@
 			?>
 				
 			<div class="toolbar">
-				<a href="#" onclick="mostraDivSlow('addCategoryForm')" class="toolbarButtonNew" id="addCategory">Nuova categoria</a>
-			</div>
-				
-			<div id="addCategoryForm" style="display:none">
-				<form action="categories.php" method="post">
-				<fieldset>
-					<legend>Aggiungi Categoria</legend>
-					
-					Nome:<br>
-					<input type="text" name="name"><br>
-					Descrizione:<br>
-					<input type="text" size=60 name="description"><br>
-					
-					<input type=hidden name="action" value="newcategory">
-					
-					<input type=submit value="Salva">
-					<input type=button id="closeTransactionForm" onclick="mostraDivSlow('addCategoryForm')" value="Annulla">
-	
-				</fieldset>
-				</form>
+				<a href="graphs.php" class="toolbarButton" id="addCategory">Saldi mensili</a>
 			</div>
 		
 			<?php
@@ -130,7 +111,7 @@
 				);
 			}
 			
-			echo '<fieldset><legend>Saldi mensili</legend>';
+			echo '<fieldset><legend>Saldi mensili '.$year.'</legend>';
 			
 			?>
 			
