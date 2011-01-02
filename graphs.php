@@ -165,6 +165,7 @@
 							</select>
 							
 							<input type=hidden name="action" value="mostrasaldi">
+							<input type=hidden name="year" value="<?php echo $year; ?>">
 							<input type=submit value="Mostra">
 						</form>
 					</div>
