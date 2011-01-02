@@ -128,22 +128,36 @@
 
 	//************************************************************************************************
 
-	function printAccount($account){
+	function printAccount($account, $saldo = 999999){
+		
 		if ($account == null) return;
+		
+		//div principale
 		echo '<div class="accountList">';
+		
+		//prima icona
 		echo '<div class="accountListIcon1">';
 			echo '<a href="account.php?action=selectaccount&id='.$account->id.'">';
 			echo '<img src="images/select.jpg"/>';
 			echo '</a>';
 		echo '</div>';
+		
+		//seconda icona
 		echo '<div class="accountListIcon2">';
 			echo '<img src="images/downTriangle.png" onclick="mostraDiv(\'accNote'.$account->id.'\')"/>';
-		echo '</div>';		
+		echo '</div>';	
+		
+		//descrizione
 		echo '<div class="accountListDescr">';
 			echo $account->description;
 		echo '</div>';
+		
+		//descrizione 2 ($saldo)
 		echo '<div class="accountListDescr2">';
-			echo count($account->transactions)." voci.";
+			if ($saldo == 999999) 
+				echo count($account->transactions)." voci.";
+			else
+				echo 'Ad oggi: <strong>'.formattaImporto($saldo).'</strong>';
 		echo '</div>';
 		echo '</div>';
 		
@@ -151,6 +165,7 @@
 		echo '<div>';
 		echo '<a href="account.php?action=deleteaccount&accountid='.$account->id.'" class="toolbarButton">Elimina conto</a>';
 		echo '</div>';
+		
 		echo '</div>';		
 		
 	}

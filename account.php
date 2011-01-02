@@ -71,7 +71,74 @@
 				//stampa lista conti
 				echo '<fieldset><legend>Selezione conto</legend>';
 				foreach ($user->accounts as $account) {
-					echo printAccount($account);
+					
+					//calcolo il saldo corrente
+					
+					//data e mese corrente
+					$month = date('m');
+					$year = date('Y');
+
+					//saldo mese precedente
+					$saldo = 0;
+					$prevMonthStart = date("Y-m-d", mktime(0, 0, 0, $month-1, 1, $year));
+					$prevMonthEnd = date("Y-m-d", mktime(0, 0, 0, $month, 1, $year));
+					$saldoMesePrec = Transaction::first(
+						array(
+							'conditions' => array('account_id = ? AND date >= ? AND date < ? AND auto = ? AND category_id = ?', 
+								$account->id, 
+								$prevMonthStart,
+								$prevMonthEnd, 
+								1,
+								0
+							),
+							'order' => 'date desc'
+						)
+					);
+					if ($saldoMesePrec != null){
+						$saldo = $saldoMesePrec->import;
+						debug('Recuperato saldo mese precedente da chiusura: '.$saldo);
+					} else{
+						notice('Il mese precedente risulta aperto, rigenerato lo storico');
+						//totale movimenti precedenti al mese
+						$precTrans = Transaction::find(
+							'all',
+							array(
+								'select' => 'sum(import) as sum_imports',
+								'conditions' => array('account_id = ? AND date < ? AND auto = ?', 
+									$account->id, 
+									$datemin, 
+									0
+								),
+							)
+						);
+						if ($precTrans != null){
+							$saldo = $precTrans[0]->sum_imports;
+							debug('Recuperato saldo mese precedente mediante ricostruzione: '.$saldo);
+						}else{
+							debug('Nulla da ricostruire');
+						}
+					}
+
+					//al saldo MP aggiungo i movimenti MC fino a oggi
+					$actualTrans = Transaction::find(
+						'all',
+						array(
+							'select' => 'sum(import) as sum_imports',
+							'conditions' => array('account_id = ? AND date >= ? AND date < ? AND auto = ?', 
+								$account->id,
+								date("Y-m-d", mktime(0, 0, 0, $month, 1, $year)),
+								date('Y-m-d'), 
+								0
+							),
+						)
+					);
+					if ($actualTrans != null){
+						$saldo += $actualTrans[0]->sum_imports;
+						debug("recuperati movimenti MC fino a oggi: ".$actualTrans[0]->sum_imports);
+					}
+					
+					//stampo il conto
+					echo printAccount($account, $saldo);
 				}
 				echo '</fieldset>';
 	
