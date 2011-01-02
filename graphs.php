@@ -7,6 +7,7 @@
 
 <script language="javascript" type="text/javascript" src="flot/jquery.flot.min.js"></script>
 <!--[if IE]><script language="javascript" type="text/javascript" src="flot/excanvas.min.js"></script><![endif]-->
+<script language="javascript" type="text/javascript" src="flot/jquery.flot.pie.js"></script>
 
 <?php
 	
@@ -14,7 +15,8 @@
 	
 	?>
 		<div class="toolbar">
-			<a href="graphs.php?action=mostrasaldi" class="toolbarButton" id="addCategory">Saldi mensili</a>
+			<a href="graphs.php?action=mostrasaldi" class="toolbarButton">Saldi mensili</a>
+			<a href="graphs.php?action=mostracat" class="toolbarButton">Movimenti per categoria</a>
 		</div>
 	<?php
 
@@ -308,6 +310,198 @@
 				$showDesc = 0;
 			
 				break;
+
+
+			// MOSTRACAT: mostra un grafico con i movimenti delle categorie nel mese
+			case "mostracat":
+				if (!isset($_SESSION['userid'])){
+					err("Utente non valido");
+					break;
+				}
+					
+				//individuo utente
+				$user = User::first( 
+					array(
+						'conditions' => array('id = ?', $_SESSION['userid'])
+					)
+				);
+				
+				//se utente non valido interrompo
+				if ($user == null){
+					err('Errore: passato ID di utente inesistente.');
+					break;
+				}
+				
+				//individua il conto richiesto per l'utente
+				if (isset($_GET['accountid'])){
+					if ($_GET['accountid'] == 0) unset($_GET['accountid']);
+				}
+				if (isset($_GET['accountid'])){
+					$account = Account::first(
+						array(
+							'conditions' => array(
+								'user_id = ? AND id = ?', 
+								$_SESSION['userid'],
+								$_GET['accountid']
+							)
+						)				
+					);					
+				} 
+				else{
+					$account = Account::first(
+						array(
+							'conditions' => array(
+								'user_id = ?', 
+								$_SESSION['userid']
+							)
+						)				
+					);
+					debug('Non passato conto, scelto il primo');	
+				}
+				
+				if (!isset($account)){
+					err('Nessun conto selezionato o conto non valido.');
+					break;
+				}
+				
+				//imposta anno e mese per analisi
+				$month = date('m');
+				$year = date('Y');
+				
+				if (isset($_GET['month'])){
+					if (is_numeric($_GET['month']) && $_GET['month'] <= 12){
+						$month = $_GET['month'];
+					}
+				}
+				if (isset($_GET['year'])){
+					if (is_numeric($_GET['year'])){
+						$year = $_GET['year'];
+					}
+				}
+				
+				$beginMonth = date("Y-m-d", mktime(0, 0, 0, $month, 1, $year));
+				$endMonth = date("Y-m-d", mktime(0, 0, 0, $month+1, 1, $year));
+				
+				//inizializzo array vuoto con indici pari a tutte le categorie
+				//dell'utente
+				$userCategories = Category::find(
+					'all',
+					array(
+						'conditions' => array(
+							'user_id = ?',
+							$_SESSION['userid']
+						)
+					)
+				);
+				
+				$categories = array();
+				foreach ($userCategories as $userCategory){
+					$categories[$userCategory->id] = 0;
+					$catNames[$userCategory->id] = $userCategory->name;
+				}
+				
+				//individuo tutte le transazioni nel periodo desiderato
+				$transactions = Transaction::find(
+					'all',
+					array(
+						'conditions' => array(
+							'account_id = ? AND date >= ? AND date < ? AND auto = ?', 
+							$account->id,
+							$beginMonth,
+							$endMonth,
+							0
+						)
+					)				
+				);			
+				
+				foreach($transactions as $transaction){
+					if (isset($categories[$transaction->category_id])){
+						$categories[$transaction->category_id] += $transaction->import;
+					}
+				}
+				
+				//stampa grafico con categorie
+				
+
+
+					?>
+					
+					<!-- spazio per costruzione legenda grafico -->
+					<div id="legenda" style="width:400px;margin-left:10px;margin-right:10px;"></div>
+					
+					<!-- spazio per costruzione canvas grafico -->
+					<div id="placeholder" style="width:600px;height:300px;"></div>
+					
+					
+					<script>				
+					$(function () {
+					    				    
+						<?php 
+							//crea le variabili con i dati
+							$i = 0;
+							foreach($categories as $category){
+								echo 'var d'.$i.' = [];';
+								echo 'd'.$i.'.push(['.$i.','.$category.']);';
+								$i++;
+							}
+						?>    
+					
+					    $.plot($("#placeholder"), [
+					    
+					    <?php
+					    	//inizializza le serie
+					    	$i = 0;
+							foreach($catNames as $catName){
+								echo '{';
+								echo 'data: d'.$i.',';
+								echo 'label: "'.$catName.'",';
+								echo 'bars: { show: true },';
+								echo '},';
+								$i++;
+							}				    
+					    ?>
+	
+					    ],{
+							xaxis: {
+		            			ticks: [
+		            			
+		            			<?php
+		            				$i = 0.5;
+		            				foreach($catNames as $catName){
+		            					echo '['.$i.',"'.$catName.'"],';
+		            					$i++;
+		            				}
+		            			?>
+
+								]
+	        				},
+	        				grid: {
+	            				backgroundColor: { 
+            						colors: ["#fff", "#eee"] 
+            					}
+	       		 			},
+							legend: {
+								container: legenda
+							},	
+							grid: { 
+								hoverable: true, 
+								clickable: true 
+							}		
+	       		 
+					    });
+					});	
+					</script>
+					<?php
+
+
+
+
+				
+				
+				$showDesc = 0;
+
+				break;
+
 			
 			
 			default:
