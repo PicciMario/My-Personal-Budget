@@ -69,6 +69,8 @@
 				<?php
 				
 				//stampa lista conti
+				$saldoComplessivo = 0;
+				
 				echo '<fieldset><legend>Selezione conto</legend>';
 				foreach ($user->accounts as $account) {
 					
@@ -139,7 +141,9 @@
 					
 					//stampo il conto
 					echo printAccount($account, $saldo);
+					$saldoComplessivo += $saldo;
 				}
+				printTotal("Saldo complessivo a oggi:", $saldoComplessivo, 2);
 				echo '</fieldset>';
 	
 				break;
