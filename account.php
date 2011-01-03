@@ -1111,10 +1111,10 @@
 		if (isset($_SESSION['temp']['newtransaction'])){
 			$description = $_SESSION['temp']['newtransaction']['description'];
 			$import = $_SESSION['temp']['newtransaction']['import'];
-			$category = $_SESSION['temp']['newtransaction']['category_id'];
+			$categoryPrev = $_SESSION['temp']['newtransaction']['category_id'];
 			$date = $_SESSION['temp']['newtransaction']['date'];
 			$note = $_SESSION['temp']['newtransaction']['note'];
-			$tags = "aa";//$_SESSION['temp']['newtransaction']['tags'];
+			$tags = $_SESSION['temp']['newtransaction']['tags'];
 			unset($_SESSION['temp']['newtransaction']);
 			echo '<script>$(document).ready(function() {$(\'div#addTransactionForm\').show();})</script>';
 		}
@@ -1196,7 +1196,11 @@
 				<select name="category_id">
 					<?php
 					foreach($categories as $category){
-						echo '<option value="'.$category->id.'">'.$category->name.'</option>';
+						echo '<option value="'.$category->id.'"';
+						if (isset($categoryPrev)){
+							if ($categoryPrev == $category->id) echo ' selected ';
+						}
+						echo '>'.$category->name.'</option>';
 						echo $category->name;
 					}
 					?>
