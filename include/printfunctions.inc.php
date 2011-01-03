@@ -239,8 +239,8 @@
 			12 => 'Dicembre'
 		);
 
-		if (isset($mesi[$mese]))
-			return $mesi[$mese];
+		if (isset($mesi[(int)$mese]))
+			return $mesi[(int)$mese];
 		else
 			return "";
 	}

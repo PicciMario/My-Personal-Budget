@@ -412,7 +412,71 @@
 				//stampa grafico con categorie
 				?>
 				
-				<fieldset><legend>Saldi mensili per categoria (tutti i conti)</legend>
+				<fieldset><legend>Saldi mensili per categoria (tutti i conti) - <?php echo decodificaMese($month).' '.$year ?></legend>
+		
+				<?php
+				//-----------------------------------------------------------------------------------------------------
+				
+				//calcola mese precedente
+				$prevyear = $year;
+				$prevmonth = $month - 1;
+				if ($prevmonth == 0){
+					$prevmonth = 12;
+					$prevyear = $prevyear - 1;
+				}
+				
+				//calcola mese successivo
+				$nextyear = $year;
+				$nextmonth = $month + 1;
+				if ($nextmonth > 12){
+					$nextmonth = 1;
+					$nextyear = $nextyear + 1;
+				}
+				
+		 		//barra di cambio mese
+				echo '<div>';
+				echo '<div align=center>';
+				echo '<a href="graphs.php?action=mostracat&year='.$prevyear.'&month='.$prevmonth.'" class="toolbarButtonLeft">&lt;&lt;&lt;</a>';
+				echo '<a href="graphs.php?action=mostracat" class="toolbarButton">Oggi</a>';
+				echo '<a href="#" class="toolbarButton" onclick="mostraDiv(\'selectPeriod\')">Scegli...</a>';
+				echo '<a href="graphs.php?action=mostracat&year='.$nextyear.'&month='.$nextmonth.'" class="toolbarButtonRight">&gt;&gt;&gt;</a>';
+				echo '</div>';
+				echo '<p>';
+				echo '</div>';
+				?>
+				<div align="center" id="selectPeriod" style="display:none;">
+				<form action="graphs.php" method="GET" class="inline">
+				Anno: 
+				<select name="year">
+					<?php
+					for ($i = 2000; $i < 2020; $i++){
+						echo '<option value="'.$i.'"';
+						if (date('Y') == $i) echo ' selected';
+						echo '>'.$i.'</option>';
+					}
+					?>
+				</select>
+				Mese: 
+				<select name="month">
+					<option value="01" <?php if (date('m') == 1) echo ' selected ' ?> >Gennaio</option>
+					<option value="02" <?php if (date('m') == 2) echo ' selected ' ?> >Febbraio</option>
+					<option value="03" <?php if (date('m') == 3) echo ' selected ' ?> >Marzo</option>
+					<option value="04" <?php if (date('m') == 4) echo ' selected ' ?> >Aprile</option>
+					<option value="05" <?php if (date('m') == 5) echo ' selected ' ?> >Maggio</option>
+					<option value="06" <?php if (date('m') == 6) echo ' selected ' ?> >Giugno</option>
+					<option value="07" <?php if (date('m') == 7) echo ' selected ' ?> >Luglio</option>
+					<option value="08" <?php if (date('m') == 8) echo ' selected ' ?> >Agosto</option>
+					<option value="09" <?php if (date('m') == 9) echo ' selected ' ?> >Settembre</option>
+					<option value="10" <?php if (date('m') == 10) echo ' selected ' ?> >Ottobre</option>
+					<option value="11" <?php if (date('m') == 11) echo ' selected ' ?> >Novembre</option>
+					<option value="12" <?php if (date('m') == 12) echo ' selected ' ?> >Dicembre</option>
+				</select>
+				<input type=submit value="Vai">
+				<input type="hidden" name="action" value="mostracat">
+				</form>	
+				</div>
+				
+				<hr>
 				
 				<!-- spazio per costruzione legenda grafico -->
 				<div id="legenda" style="width:400px;margin-left:10px;margin-right:10px;"></div>
