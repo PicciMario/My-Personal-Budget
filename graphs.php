@@ -126,7 +126,7 @@
 					<div align=center>
 					<div>
 						<a href="graphs.php?action=mostrasaldi&year=<?php echo $year-1 ?>" class="toolbarButtonLeftText" id="addCategory"><?php echo $year-1 ?></a>
-						<a href="graphs.php?action=mostrasaldi&year=<?php echo date("Y") ?>" class="toolbarButton" id="addCategory">Oggi: <?php echo date("Y") ?></a>
+						<a href="graphs.php?action=mostrasaldi&year=<?php echo date('Y') ?>" class="toolbarButton" id="addCategory">Oggi: <?php echo date("Y") ?></a>
 						
 						<span id="scegliConto">
 						<button id="scegliContoNome">

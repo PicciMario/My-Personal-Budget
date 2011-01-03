@@ -42,8 +42,7 @@
 					break;
 				}	
 				
-				?>
-				
+				?>			
 
 				<div class="toolbar">
 					<a href="#" class="toolbarButtonNew" id="addTransaction" onclick="mostraDivSlow('addAccountForm')">Nuovo conto</a>
@@ -129,7 +128,7 @@
 							'conditions' => array('account_id = ? AND date >= ? AND date < ? AND auto = ?', 
 								$account->id,
 								date("Y-m-d", mktime(0, 0, 0, $month, 1, $year)),
-								date('Y-m-d'), 
+								date("Y-m-d", mktime(0, 0, 0, date('m'), date('d')+1, date('Y'))),
 								0
 							),
 						)
