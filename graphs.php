@@ -16,7 +16,7 @@
 	?>
 		<div class="toolbar">
 			<a href="graphs.php?action=mostrasaldi" class="toolbarButton">Saldi mensili</a>
-			<a href="graphs.php?action=mostracat" class="toolbarButton">Movimenti per categoria</a>
+			<a href="graphs.php?action=mostracat" class="toolbarButton">Saldi per categoria</a>
 		</div>
 	<?php
 
