@@ -394,10 +394,13 @@
 					)
 				);
 				
+				$i = 0;
 				$categories = array();
 				foreach ($userCategories as $userCategory){
-					$categories[$userCategory->id] = 0;
-					$catNames[$userCategory->id] = $userCategory->name;
+					$categories[$i]['id'] = $userCategory->id;
+					$categories[$i]['import'] = 0;
+					$categories[$i]['descr'] = $userCategory->name;
+					$i++;
 				}
 				
 				//individuo tutte le transazioni nel periodo desiderato
@@ -415,88 +418,82 @@
 				);			
 				
 				foreach($transactions as $transaction){
-					if (isset($categories[$transaction->category_id])){
-						$categories[$transaction->category_id] += $transaction->import;
+					
+					//trova elemento di $categories con id corretto
+					for($i = 0; $i < count($categories); $i++){
+						if ($categories[$i]['id'] == $transaction->category_id){
+							$categories[$i]['import'] += $transaction->import;
+						}
 					}
+					
 				}
 				
 				//stampa grafico con categorie
+				?>
 				
-
-
-					?>
-					
-					<!-- spazio per costruzione legenda grafico -->
-					<div id="legenda" style="width:400px;margin-left:10px;margin-right:10px;"></div>
-					
-					<!-- spazio per costruzione canvas grafico -->
-					<div id="placeholder" style="width:600px;height:300px;"></div>
-					
-					
-					<script>				
-					$(function () {
-					    				    
-						<?php 
-							//crea le variabili con i dati
-							$i = 0;
-							foreach($categories as $category){
-								echo 'var d'.$i.' = [];';
-								echo 'd'.$i.'.push(['.$i.','.$category.']);';
-								$i++;
-							}
-						?>    
-					
-					    $.plot($("#placeholder"), [
-					    
-					    <?php
-					    	//inizializza le serie
-					    	$i = 0;
-							foreach($catNames as $catName){
-								echo '{';
-								echo 'data: d'.$i.',';
-								echo 'label: "'.$catName.'",';
-								echo 'bars: { show: true },';
-								echo '},';
-								$i++;
-							}				    
-					    ?>
-	
-					    ],{
-							xaxis: {
-		            			ticks: [
-		            			
-		            			<?php
-		            				$i = 0.5;
-		            				foreach($catNames as $catName){
-		            					echo '['.$i.',"'.$catName.'"],';
-		            					$i++;
-		            				}
-		            			?>
-
-								]
-	        				},
-	        				grid: {
-	            				backgroundColor: { 
-            						colors: ["#fff", "#eee"] 
-            					}
-	       		 			},
-							legend: {
-								container: legenda
-							},	
-							grid: { 
-								hoverable: true, 
-								clickable: true 
-							}		
-	       		 
-					    });
-					});	
-					</script>
-					<?php
-
-
-
-
+				<fieldset><legend>Saldi mensili per categoria</legend>
 				
+				<!-- spazio per costruzione legenda grafico -->
+				<div id="legenda" style="width:400px;margin-left:10px;margin-right:10px;"></div>
+				
+				<!-- spazio per costruzione canvas grafico -->
+				<div id="placeholder" style="width:600px;height:300px;"></div>
+				
+				</fieldset>
+				
+				<script>				
+				$(function () {
+				    				    
+					<?php 
+						//crea le variabili con i dati
+						for($i = 0; $i < count($categories); $i++){
+							echo 'var d'.$i.' = [];';
+							echo 'd'.$i.'.push(['.$i.','.$categories[$i]['import'].']);';
+						}
+					?>    
+				
+				    $.plot($("#placeholder"), [
+				    
+				    <?php
+				    	//inizializza le serie
+						for($i = 0; $i < count($categories); $i++){
+							echo '{';
+							echo 'data: d'.$i.',';
+							echo 'label: "'.$categories[$i]['descr'].'",';
+							echo 'bars: { show: true },';
+							echo '},';
+						}				    
+				    ?>
+
+				    ],{
+						xaxis: {
+	            			ticks: [
+	            			
+	            			<?php
+	            				for($i = 0; $i < count($categories); $i++){
+	            					echo '['.($i+0.5).',"'.$categories[$i]['descr'].'"],';
+	            				}
+	            			?>
+
+							]
+        				},
+        				grid: {
+            				backgroundColor: { 
+           						colors: ["#fff", "#eee"] 
+           					}
+       		 			},
+						legend: {
+							container: legenda
+						},	
+						grid: { 
+							hoverable: true, 
+							clickable: true 
+						}		
+       		 
+				    });
+				});	
+				</script>
+				<?php
 				
 				$showDesc = 0;
 

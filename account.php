@@ -108,7 +108,7 @@
 								'select' => 'sum(import) as sum_imports',
 								'conditions' => array('account_id = ? AND date < ? AND auto = ?', 
 									$account->id, 
-									$datemin, 
+									$prevMonthEnd, 
 									0
 								),
 							)
@@ -1141,8 +1141,8 @@
 		$date1stJan = date("Y-m-d", mktime(0, 0, 0, 1, 1, $year));
 		$datemin = date("Y-m-d", mktime(0, 0, 0, $month, 1, $year));
 		$datemax = date("Y-m-d", mktime(0, 0, 0, $month+1, 1, $year));
-		$datetoday = date("Y-m-d");
-		debug("min: $datemin - max: $datemax - today: $datetoday - 1stJan: $date1stJan ");
+		$datetomorrow = date("Y-m-d", mktime(0, 0, 0, date('m'), date('d')+1, date('Y')));
+		debug("min: $datemin - max: $datemax - tomorrow: $datetomorrow - 1stJan: $date1stJan ");
 		
 		//analizzo il mese per vedere se è stato chiuso
 		$cercaChiusura = Transaction::first(
@@ -1357,10 +1357,10 @@
 				'all',
 				array(
 					'conditions' => array(
-						'account_id = ? AND date >= ? AND date <= ? AND auto = ?', 
+						'account_id = ? AND date >= ? AND date < ? AND auto = ?', 
 						$conto->id, 
 						$datemin, 
-						$datetoday,
+						$datetomorrow,
 						0
 					),
 					'order' => 'date asc'
@@ -1372,9 +1372,9 @@
 				'all',
 				array(
 					'conditions' => array(
-						'account_id = ? AND date > ? AND date < ? AND auto = ?', 
+						'account_id = ? AND date >= ? AND date < ? AND auto = ?', 
 						$conto->id, 
-						$datetoday, 
+						$datetomorrow, 
 						$datemax,
 						0
 					),

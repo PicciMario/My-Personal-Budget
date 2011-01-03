@@ -1,28 +1,44 @@
 <?php
 
 	function printCategory($category){
+		
 		if ($category == null) return;
+		
+		//div principale
 		echo '<div class="categoryList">';
+		
+		//prima icona
 		echo '<div class="categoryListIcon1">';
 			echo '<a href="categories.php?action=showcategory&categoryid='.$category->id.'">';
 			echo '<img src="images/select.jpg"/>';
 			echo '</a>';
 		echo '</div>';
+		
+		//seconda icona
 		echo '<div class="categoryListIcon2">';
 			echo '<img src="images/downTriangle.png" onclick="mostraDiv(\'accNote'.$category->id.'\')"/>';
 		echo '</div>';		
+		
+		//descrizione
 		echo '<div class="categoryListDescr">';
 			echo $category->name;
 		echo '</div>';
+		
+		//descrizione 2
 		echo '<div class="categoryListDescr2">';
-			echo $category->description;
-		echo '</div>';
+			echo stripslashes($category->description);
 		echo '</div>';
 		
-		echo '<div id="accNote'.$category->id.'" style="display:none;" class="accountNote aNote">';
-		echo '<div>';
-		echo '<a href="categories.php?action=deletecategory&categoryid='.$category->id.'" class="toolbarButton">Elimina categoria</a>';
 		echo '</div>';
+		
+		//div a scomparsa
+		echo '<div id="accNote'.$category->id.'" style="display:none;" class="accountNote aNote">';
+		
+			//toolbar nel div a scomparsa
+			echo '<div>';
+				echo '<a href="categories.php?action=deletecategory&categoryid='.$category->id.'" class="toolbarButton">Elimina categoria</a>';
+			echo '</div>';
+		
 		echo '</div>';		
 		
 	}
