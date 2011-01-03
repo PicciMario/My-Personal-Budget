@@ -332,37 +332,16 @@
 					break;
 				}
 				
-				//individua il conto richiesto per l'utente
-				if (isset($_GET['accountid'])){
-					if ($_GET['accountid'] == 0) unset($_GET['accountid']);
-				}
-				if (isset($_GET['accountid'])){
-					$account = Account::first(
-						array(
-							'conditions' => array(
-								'user_id = ? AND id = ?', 
-								$_SESSION['userid'],
-								$_GET['accountid']
-							)
-						)				
-					);					
-				} 
-				else{
-					$account = Account::first(
-						array(
-							'conditions' => array(
-								'user_id = ?', 
-								$_SESSION['userid']
-							)
-						)				
-					);
-					debug('Non passato conto, scelto il primo');	
-				}
-				
-				if (!isset($account)){
-					err('Nessun conto selezionato o conto non valido.');
-					break;
-				}
+				//individua i conti dell'utente
+				$accounts = Account::find(
+					'all',
+					array(
+						'conditions' => array(
+							'user_id = ?', 
+							$_SESSION['userid']
+						)
+					)				
+				);					
 				
 				//imposta anno e mese per analisi
 				$month = date('m');
@@ -404,34 +383,36 @@
 				}
 				
 				//individuo tutte le transazioni nel periodo desiderato
-				$transactions = Transaction::find(
-					'all',
-					array(
-						'conditions' => array(
-							'account_id = ? AND date >= ? AND date < ? AND auto = ?', 
-							$account->id,
-							$beginMonth,
-							$endMonth,
-							0
-						)
-					)				
-				);			
-				
-				foreach($transactions as $transaction){
+				foreach($accounts as $account){
+					$transactions = Transaction::find(
+						'all',
+						array(
+							'conditions' => array(
+								'account_id = ? AND date >= ? AND date < ? AND auto = ?', 
+								$account->id,
+								$beginMonth,
+								$endMonth,
+								0
+							)
+						)				
+					);			
 					
-					//trova elemento di $categories con id corretto
-					for($i = 0; $i < count($categories); $i++){
-						if ($categories[$i]['id'] == $transaction->category_id){
-							$categories[$i]['import'] += $transaction->import;
+					foreach($transactions as $transaction){
+						
+						//trova elemento di $categories con id corretto
+						for($i = 0; $i < count($categories); $i++){
+							if ($categories[$i]['id'] == $transaction->category_id){
+								$categories[$i]['import'] += $transaction->import;
+							}
 						}
+						
 					}
-					
 				}
 				
 				//stampa grafico con categorie
 				?>
 				
-				<fieldset><legend>Saldi mensili per categoria</legend>
+				<fieldset><legend>Saldi mensili per categoria (tutti i conti)</legend>
 				
 				<!-- spazio per costruzione legenda grafico -->
 				<div id="legenda" style="width:400px;margin-left:10px;margin-right:10px;"></div>
