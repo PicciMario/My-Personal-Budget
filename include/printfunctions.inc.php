@@ -163,18 +163,24 @@
 			echo '<img src="images/downTriangle.png" onclick="mostraDiv(\'accNote'.$account->id.'\')"/>';
 		echo '</div>';	
 		
-		//descrizione
+		//descrizione conto
 		echo '<div class="accountListDescr">';
 			echo $account->description;
 		echo '</div>';
 		
-		//descrizione 2 ($saldo)
-		echo '<div class="accountListDescr2">';
-			if ($saldo == 999999) 
-				echo count($account->transactions)." voci.";
-			else
-				echo 'Ad oggi: <strong>'.formattaImporto($saldo).'</strong>';
-		echo '</div>';
+		if ($saldo >= 0){
+			//$saldo positivo
+			echo '<div class="accountListValue">';
+				echo formattaImporto($saldo);
+			echo '</div>';
+		}
+		else {
+			//$saldo negativo
+			echo '<div class="accountListValue2">';
+				echo formattaImporto($saldo);
+			echo '</div>';
+		}
+		
 		echo '</div>';
 		
 		echo '<div id="accNote'.$account->id.'" style="display:none;" class="accountNote aNote">';

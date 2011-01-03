@@ -8,8 +8,8 @@
 	margin:5px;
 	height:21px;
 	border:1px solid #BDEDFF;
-	-moz-border-radius: 10px;
-	border-radius: 10px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
 }
 .accountList:hover{
 	background-color: #BDEDFF;
@@ -46,20 +46,43 @@
 	height:20px;
 	//border:1px solid black;
 }
+
 .accountListDescr{
 	position:absolute;
-	left:65px;
-	width:300px;
-	height:20px;
+	left:70px;
+	width:320px;
+	height:18px;
 	overflow:hidden;
-	//border:1px solid black;
+	//border: 1px solid black;
+	padding-right:2px;
 }
-.accountListDescr2{
+
+.accountListValue{
 	position:absolute;
-	left:370px;
-	height:20px;
+	left:465px;
+	width:90px;
+	height:18px;
 	overflow:hidden;
-	//border:1px solid black;
+	border: 1px solid green;
+	text-align: right;
+	padding-right:2px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
+	background-color:#81F781;
+}
+
+.accountListValue2{
+	position:absolute;
+	left:565px;
+	width:90px;
+	height:18px;
+	overflow:hidden;
+	border: 1px solid darkred;
+	text-align: right;
+	padding-right:2px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
+	background-color:#F78181;
 }
 
 /* Lista categorie ----------------------------------------------------------------------- */
