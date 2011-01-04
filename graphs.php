@@ -17,6 +17,7 @@
 		<div class="toolbar">
 			<a href="graphs.php?action=mostrasaldi" class="toolbarButton">Saldi mensili</a>
 			<a href="graphs.php?action=mostracat" class="toolbarButton">Saldi per categoria</a>
+			<a href="graphs.php?action=mostraentusc" class="toolbarButton">Entrate/Uscite</a>
 		</div>
 	<?php
 
@@ -544,7 +545,278 @@
 
 				break;
 
-			
+
+			// MOSTRAENTUSC: mostra la suddivisione delle entrate e delle uscite nel mese per tutti i conti
+			case "mostraentusc":
+				if (!isset($_SESSION['userid'])){
+					err("Utente non valido");
+					break;
+				}
+					
+				//individuo utente
+				$user = User::first( 
+					array(
+						'conditions' => array('id = ?', $_SESSION['userid'])
+					)
+				);
+				
+				//se utente non valido interrompo
+				if ($user == null){
+					err('Errore: passato ID di utente inesistente.');
+					break;
+				}
+				
+				//individua i conti dell'utente
+				$accounts = Account::find(
+					'all',
+					array(
+						'conditions' => array(
+							'user_id = ?', 
+							$_SESSION['userid']
+						)
+					)				
+				);					
+				
+				//imposta anno e mese per analisi
+				$month = date('m');
+				$year = date('Y');
+				
+				if (isset($_GET['month'])){
+					if (is_numeric($_GET['month']) && $_GET['month'] <= 12){
+						$month = $_GET['month'];
+					}
+				}
+				if (isset($_GET['year'])){
+					if (is_numeric($_GET['year'])){
+						$year = $_GET['year'];
+					}
+				}
+				
+				$beginMonth = date("Y-m-d", mktime(0, 0, 0, $month, 1, $year));
+				$endMonth = date("Y-m-d", mktime(0, 0, 0, $month+1, 1, $year));
+				
+				//inizializzo array vuoto con indici pari a tutte le categorie
+				//dell'utente
+				$userCategories = Category::find(
+					'all',
+					array(
+						'conditions' => array(
+							'user_id = ?',
+							$_SESSION['userid']
+						)
+					)
+				);
+				
+				$i = 0;
+				$categories = array();
+				foreach ($userCategories as $userCategory){
+					$categories[$i]['id'] = $userCategory->id;
+					$categories[$i]['import'] = 0;
+					$categories[$i]['descr'] = $userCategory->name;
+					$i++;
+				}
+				
+				$i = 0;
+				$categoriesIn = array();
+				foreach ($userCategories as $userCategory){
+					$categoriesIn[$i]['id'] = $userCategory->id;
+					$categoriesIn[$i]['import'] = 0;
+					$categoriesIn[$i]['descr'] = $userCategory->name;
+					$i++;
+				}
+				
+				//individuo tutte le uscite nel periodo desiderato
+				foreach($accounts as $account){
+					$transactions = Transaction::find(
+						'all',
+						array(
+							'conditions' => array(
+								'account_id = ? AND date >= ? AND date < ? AND auto = ? AND import <= 0', 
+								$account->id,
+								$beginMonth,
+								$endMonth,
+								0
+							)
+						)				
+					);			
+					
+					foreach($transactions as $transaction){
+						
+						//trova elemento di $categories con id corretto
+						for($i = 0; $i < count($categories); $i++){
+							if ($categories[$i]['id'] == $transaction->category_id){
+								$categories[$i]['import'] += $transaction->import;
+							}
+						}
+						
+					}
+				}
+				
+				//individuo tutte le entrate nel periodo desiderato
+				foreach($accounts as $account){
+					$transactions = Transaction::find(
+						'all',
+						array(
+							'conditions' => array(
+								'account_id = ? AND date >= ? AND date < ? AND auto = ? AND import > 0', 
+								$account->id,
+								$beginMonth,
+								$endMonth,
+								0
+							)
+						)				
+					);			
+					
+					foreach($transactions as $transaction){
+						
+						//trova elemento di $categories con id corretto
+						for($i = 0; $i < count($categories); $i++){
+							if ($categoriesIn[$i]['id'] == $transaction->category_id){
+								$categoriesIn[$i]['import'] += $transaction->import;
+							}
+						}
+						
+					}
+				}
+				
+				//stampa grafico con categorie
+				?>
+				
+				<fieldset><legend>Entrate/uscite mensili per categoria (tutti i conti) - <?php echo decodificaMese($month).' '.$year ?></legend>
+		
+				<?php
+				//-----------------------------------------------------------------------------------------------------
+				
+				//calcola mese precedente
+				$prevyear = $year;
+				$prevmonth = $month - 1;
+				if ($prevmonth == 0){
+					$prevmonth = 12;
+					$prevyear = $prevyear - 1;
+				}
+				
+				//calcola mese successivo
+				$nextyear = $year;
+				$nextmonth = $month + 1;
+				if ($nextmonth > 12){
+					$nextmonth = 1;
+					$nextyear = $nextyear + 1;
+				}
+				
+		 		//barra di cambio mese
+				echo '<div>';
+				echo '<div align=center>';
+				echo '<a href="graphs.php?action=mostraentusc&year='.$prevyear.'&month='.$prevmonth.'" class="toolbarButtonLeft">&lt;&lt;&lt;</a>';
+				echo '<a href="graphs.php?action=mostraentusc" class="toolbarButton">Oggi</a>';
+				echo '<a href="#" class="toolbarButton" onclick="mostraDiv(\'selectPeriod\')">Scegli...</a>';
+				echo '<a href="graphs.php?action=mostraentusc&year='.$nextyear.'&month='.$nextmonth.'" class="toolbarButtonRight">&gt;&gt;&gt;</a>';
+				echo '</div>';
+				echo '<p>';
+				echo '</div>';
+				?>
+				<div align="center" id="selectPeriod" style="display:none;">
+				<form action="graphs.php" method="GET" class="inline">
+				Anno: 
+				<select name="year">
+					<?php
+					for ($i = 2000; $i < 2020; $i++){
+						echo '<option value="'.$i.'"';
+						if (date('Y') == $i) echo ' selected';
+						echo '>'.$i.'</option>';
+					}
+					?>
+				</select>
+				Mese: 
+				<select name="month">
+					<option value="01" <?php if (date('m') == 1) echo ' selected ' ?> >Gennaio</option>
+					<option value="02" <?php if (date('m') == 2) echo ' selected ' ?> >Febbraio</option>
+					<option value="03" <?php if (date('m') == 3) echo ' selected ' ?> >Marzo</option>
+					<option value="04" <?php if (date('m') == 4) echo ' selected ' ?> >Aprile</option>
+					<option value="05" <?php if (date('m') == 5) echo ' selected ' ?> >Maggio</option>
+					<option value="06" <?php if (date('m') == 6) echo ' selected ' ?> >Giugno</option>
+					<option value="07" <?php if (date('m') == 7) echo ' selected ' ?> >Luglio</option>
+					<option value="08" <?php if (date('m') == 8) echo ' selected ' ?> >Agosto</option>
+					<option value="09" <?php if (date('m') == 9) echo ' selected ' ?> >Settembre</option>
+					<option value="10" <?php if (date('m') == 10) echo ' selected ' ?> >Ottobre</option>
+					<option value="11" <?php if (date('m') == 11) echo ' selected ' ?> >Novembre</option>
+					<option value="12" <?php if (date('m') == 12) echo ' selected ' ?> >Dicembre</option>
+				</select>
+				<input type=submit value="Vai">
+				<input type="hidden" name="action" value="mostraentusc">
+				</form>	
+				</div>
+				
+				<hr>
+				
+				<!-- spazio per costruzione legenda grafico -->
+				<div id="legenda" style="width:400px;margin-left:10px;margin-right:10px;"></div>
+				
+				<!-- spazio per costruzione canvas grafico -->
+				<div id="placeholder" style="width:600px;height:300px;"></div>
+				
+				<!-- spazio per costruzione legenda grafico -->
+				<div id="legendaIn" style="width:400px;margin-left:10px;margin-right:10px;"></div>
+				
+				<!-- spazio per costruzione canvas grafico -->
+				<div id="placeholderIn" style="width:600px;height:300px;"></div>
+				
+				</fieldset>
+				
+				<script>				
+				$(function () {
+					
+					// data
+					var data = [
+						<?php
+							foreach($categories as $category){
+								echo '{ label: "'.$category['descr'].'", data: '.$category['import'].'},';
+							}
+						?>
+					];
+								    				 
+				    $.plot($("#placeholder"), data, 
+				    {
+						series:{
+							pie:{
+								show:true
+							}
+						},
+						legend: {
+							show:false
+						},	
+				    });
+				    
+					// data
+					var dataIn = [
+						<?php
+							foreach($categoriesIn as $category){
+								echo '{ label: "'.$category['descr'].'", data: '.$category['import'].'},';
+							}
+						?>
+					];
+								    				 
+				    $.plot($("#placeholderIn"), dataIn, 
+				    {
+						series:{
+							pie:{
+								show:true
+							}
+						},
+						legend: {
+							show:false
+						},	
+				    });				    
+				    
+				    
+				    
+				});	
+				</script>
+				<?php
+				
+				$showDesc = 0;
+
+				break;
+
 			
 			default:
 				err("Passato in GET parametro action sconosciuto: ".$_GET['action']);
