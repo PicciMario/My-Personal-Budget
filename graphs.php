@@ -748,17 +748,11 @@
 				
 				<hr>
 				
-				<!-- spazio per costruzione legenda grafico -->
-				<div id="legenda" style="width:400px;margin-left:10px;margin-right:10px;"></div>
+				<!-- spazio per costruzione canvas grafico -->
+				<div id="placeholder" style="width:300px;height:300px;float:left"></div>
 				
 				<!-- spazio per costruzione canvas grafico -->
-				<div id="placeholder" style="width:600px;height:300px;"></div>
-				
-				<!-- spazio per costruzione legenda grafico -->
-				<div id="legendaIn" style="width:400px;margin-left:10px;margin-right:10px;"></div>
-				
-				<!-- spazio per costruzione canvas grafico -->
-				<div id="placeholderIn" style="width:600px;height:300px;"></div>
+				<div id="placeholderIn" style="width:300px;height:300px;float:right"></div>
 				
 				</fieldset>
 				
@@ -778,13 +772,25 @@
 				    {
 						series:{
 							pie:{
-								show:true
+								show:true,
+								radius:1,
+								label:{
+									show:true,
+									radius:3/4,
+									formatter: function(label, series){
+										return '<div style="font-size:12px; text-align:center; padding:2px; color:black;">'+label+'<br/>'+Math.round(series.percent)+'%</div>';
+									}
+								},
+								background:{
+									opacity:0.5,
+									color:'#000'
+								}
 							}
 						},
 						legend: {
 							show:false
 						},	
-				    });
+				    });	
 				    
 					// data
 					var dataIn = [
@@ -799,7 +805,19 @@
 				    {
 						series:{
 							pie:{
-								show:true
+								show:true,
+								radius:1,
+								label:{
+									show:true,
+									radius:3/4,
+									formatter: function(label, series){
+										return '<div style="font-size:12px; text-align:center; padding:2px; color:black;">'+label+'<br/>'+Math.round(series.percent)+'%</div>';
+									}
+								},
+								background:{
+									opacity:0.5,
+									color:'#000'
+								}
 							}
 						},
 						legend: {
