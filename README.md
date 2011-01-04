@@ -6,10 +6,12 @@ My Personal Budget è una applicazione web based per la gestione della contabili
 * Chiusure contabili: a fine mese un conto può essere "chiuso", cristallizzando il saldo per evitare alterazioni successive.
 * Movimenti: vengono mostrati i movimenti (entrate/uscite) del conto attivo. Vengono inoltre mostrati il saldo iniziale (corrispondente alla chiusura contabile del mese precedente), il saldo al giorno corrente, il saldo previsto a fine mese. Inoltre sono mostrate tutte le chiusure contabili dei mesi precedenti fino all'inizio dell'anno solare.
 * Categorie, tag: i movimenti sono suddivisi in categorie contabili; inoltre a ciascun movimento può essere assegnato un numero arbitrario di tag liberi per facilitarne la classificazione. 
-* Grafici: sono previsti dei grafici per mostrare in modo chiaro ed immediato le situazioni finanziarie:
-** Saldi mensili: un grafico che mostra le chiusure mensili di tutti i conti per tutto un anno solare.
-** Saldi per categoria: un grafico che mostra la somma dei movimenti di ciascuna categoria (per tutti i conti) in un mese selezionato.
-** Entrate/uscite: due grafici a torta che mostrano la distribuzione degli importi di entrate e uscite (di tutti i conti) tra le categorie.
+
+## Grafici
+Sono previsti dei grafici per mostrare in modo chiaro ed immediato le situazioni finanziarie:
+* Saldi mensili: un grafico che mostra le chiusure mensili di tutti i conti per tutto un anno solare.
+* Saldi per categoria: un grafico che mostra la somma dei movimenti di ciascuna categoria (per tutti i conti) in un mese selezionato.
+* Entrate/uscite: due grafici a torta che mostrano la distribuzione degli importi di entrate e uscite (di tutti i conti) tra le categorie.
 
 # Installazione
 
