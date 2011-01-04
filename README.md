@@ -9,6 +9,7 @@ My Personal Budget è una applicazione web based per la gestione della contabili
 
 ## Grafici
 Sono previsti dei grafici per mostrare in modo chiaro ed immediato le situazioni finanziarie:
+
 * Saldi mensili: un grafico che mostra le chiusure mensili di tutti i conti per tutto un anno solare.
 * Saldi per categoria: un grafico che mostra la somma dei movimenti di ciascuna categoria (per tutti i conti) in un mese selezionato.
 * Entrate/uscite: due grafici a torta che mostrano la distribuzione degli importi di entrate e uscite (di tutti i conti) tra le categorie.
