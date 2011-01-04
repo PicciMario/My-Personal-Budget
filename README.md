@@ -29,5 +29,5 @@ Il database è SqLite3 ed è nel file my_database.db (che fantasia, eh?). E' sta
 
 Tra i dati di prova vengono generati due utenti:
 
-	* user: "mario", password: "mille"
-	* user: "admin", password: "mille"
+* user: "mario", password: "mille"
+* user: "admin", password: "mille"
