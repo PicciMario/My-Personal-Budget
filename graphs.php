@@ -608,11 +608,11 @@
 				);
 				
 				$i = 0;
-				$categories = array();
+				$categoriesOut = array();
 				foreach ($userCategories as $userCategory){
-					$categories[$i]['id'] = $userCategory->id;
-					$categories[$i]['import'] = 0;
-					$categories[$i]['descr'] = $userCategory->name;
+					$categoriesOut[$i]['id'] = $userCategory->id;
+					$categoriesOut[$i]['import'] = 0;
+					$categoriesOut[$i]['descr'] = $userCategory->name;
 					$i++;
 				}
 				
@@ -643,9 +643,9 @@
 					foreach($transactions as $transaction){
 						
 						//trova elemento di $categories con id corretto
-						for($i = 0; $i < count($categories); $i++){
-							if ($categories[$i]['id'] == $transaction->category_id){
-								$categories[$i]['import'] += $transaction->import;
+						for($i = 0; $i < count($categoriesOut); $i++){
+							if ($categoriesOut[$i]['id'] == $transaction->category_id){
+								$categoriesOut[$i]['import'] += $transaction->import;
 							}
 						}
 						
@@ -670,7 +670,7 @@
 					foreach($transactions as $transaction){
 						
 						//trova elemento di $categories con id corretto
-						for($i = 0; $i < count($categories); $i++){
+						for($i = 0; $i < count($categoriesIn); $i++){
 							if ($categoriesIn[$i]['id'] == $transaction->category_id){
 								$categoriesIn[$i]['import'] += $transaction->import;
 							}
@@ -749,10 +749,40 @@
 				<hr>
 				
 				<!-- spazio per costruzione canvas grafico -->
-				<div id="placeholder" style="width:300px;height:300px;float:left"></div>
+				<div style="width:320px;float:left;" align=center>
+				<h3>Uscite</h3>
+				<div id="placeholder" style="width:300px;height:300px"></div>
+				<table>
+				<tr><th>Categoria</th><th>Importo</th></tr>
+				<?php
+					foreach($categoriesOut as $categoryOut){
+						if ($categoryOut['import'] == 0) continue;
+						echo '<tr>';
+						echo '<td>'.$categoryOut['descr'].'</td>';
+						echo '<td>'.formattaImporto($categoryOut['import']).'</td>';
+						echo '</tr>';
+					}
+				?>
+				</table>
+				</div>
 				
 				<!-- spazio per costruzione canvas grafico -->
-				<div id="placeholderIn" style="width:300px;height:300px;float:right"></div>
+				<div style="width:320px;float:right;" align=center>
+				<h3>Entrate</h3>
+				<div id="placeholderIn" style="width:300px;height:300px;"></div>
+				<table>
+				<tr><th>Categoria</th><th>Importo</th></tr>
+				<?php
+					foreach($categoriesIn as $categoryIn){
+						if ($categoryIn['import'] == 0) continue;
+						echo '<tr>';
+						echo '<td>'.$categoryIn['descr'].'</td>';
+						echo '<td>'.formattaImporto($categoryIn['import']).'</td>';
+						echo '</tr>';
+					}
+				?>
+				</table>
+				</div>
 				
 				</fieldset>
 				
@@ -762,7 +792,7 @@
 					// data
 					var data = [
 						<?php
-							foreach($categories as $category){
+							foreach($categoriesOut as $category){
 								echo '{ label: "'.$category['descr'].'", data: '.$category['import'].'},';
 							}
 						?>
